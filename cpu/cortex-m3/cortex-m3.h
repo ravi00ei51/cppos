@@ -28,8 +28,13 @@ private:
     uint32_t r15;
     uint32_t r16;
 public:
+    cortex_m3_cpu(unsigned int);
     void saveCpuRegisters( void );
     void restoreCpuRegisters( void );
+    unsigned int GetR0(void);
+    unsigned int GetR1(void);
+    unsigned int GetR2(void);
+
 };
 
 #endif

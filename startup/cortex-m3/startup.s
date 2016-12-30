@@ -1,5 +1,4 @@
-.global    test_func
-.data
+.section ".datax"
 val1:    .4byte 0x20005000        @ Read-only array of bytes
 val2:    .4byte start+1
 val3:    .4byte reset1
@@ -47,12 +46,12 @@ start:                           @ Label, not really required
 #        ldr   r0, =flash_sdata
 #        ldr   r1, =ram_sdata
 #        ldr   r2, =ram_data_size
-#copy:
+copy:
 #        ldmia   r0, {r3}
 #        stmia   r1, {r3}
 #        cmp     r1,r2
 #        bne   copy
         cpsie i
-        b 0x08003000
+        bl 0x08003000
 stop:   b stop                   @ Infinite loop to stop execution
 
