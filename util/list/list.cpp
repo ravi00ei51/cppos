@@ -1,6 +1,5 @@
 #include "list.h"
-#include <iostream>
-using namespace std;
+
 list::list( void )
 {
 }
@@ -145,11 +144,9 @@ unsigned char list::listInsertNode( node * pNode, unsigned char position )
                 pTempNode = pTempNode->pNextNode;
             }
         }
-        cout<<"1. The position is "<<(unsigned int)i<<" "<<pTempNode<<endl;
     }
     else
     {
-        cout<<"2. The position is "<<(unsigned int)i<<" "<<pTempNode<<endl;
         this->pHeadNode  = pNode;
         pNode->pPrevNode = NULL;
         pNode->pNextNode = NULL;
@@ -160,7 +157,6 @@ unsigned char list::listInsertNode( node * pNode, unsigned char position )
     {
         if( pTempNode->pNextNode != NULL )
         {
-            cout<<"3. The position is "<<(unsigned int)i<<" "<<pTempNode<<endl; 
             pNode1 = pTempNode;
             pNode2 = pTempNode->pNextNode;
 
@@ -172,7 +168,6 @@ unsigned char list::listInsertNode( node * pNode, unsigned char position )
         }
         else
         {
-            cout<<"4. The position is "<<(unsigned int)i<<" "<<pTempNode<<endl;
             pTempNode->pNextNode = pNode;
             pNode->pPrevNode     = pTempNode;   
             pNode->pNextNode     = NULL;  
