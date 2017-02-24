@@ -7,15 +7,15 @@ extern int flash_sdata;
 extern int ram_sdata;
 extern int ram_edata;
 extern int ram_0data;
-static node listNode1;
-static node listNode2;
-static node listNode3;
-static node listNode4;
-static node listNode5;
-static list taskList(6);
 
-extern "C"
-{
+static node<int> listNode1;
+static node<int> listNode2;
+static node<int> listNode3;
+static node<int> listNode4;
+static node<int> listNode5;
+static list<int> taskList(6);
+
+
     extern unsigned int __init_array_start;
     extern unsigned int __init_array_end;
 
@@ -35,7 +35,6 @@ extern "C"
             pFuncCount();
         } 
     }
-}
 
 void copyDataToRam( void )
 {
@@ -60,11 +59,13 @@ void copyDataToRam( void )
     } 
 }
 
-__attribute__((section(".test"))) void test_func(void)
+__attribute__((section(".test"))) volatile void test_func(void)
 {
     static volatile unsigned int res;
-    node * pNode[5]= { NULL, NULL, NULL, NULL, NULL};
-    volatile node * pLastNode = NULL;
+ 
+    node<int> * pNode[5]= { NULL, NULL, NULL, NULL, NULL};
+    node<int> * pLastNode = NULL;
+    
     copyDataToRam();
     static_init();
     pNode[0] = &listNode1;

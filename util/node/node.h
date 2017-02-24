@@ -3,19 +3,19 @@
 
 #define NULL                  ( 0U )
 
-class node
+template <class T>class node
 {
 public: 
     node * pNextNode;
     node * pPrevNode;
-    void * pNodeData;
+    T    * pNodeData;
     unsigned char priority;
     unsigned int  dataSize;
     node( void );
-    node( void * pData );
+    node( T * pData );
     ~node( void );
-    void   nodeSetNodeData( void * pData );
-    void * nodeGetNodeData(void );
+    void   nodeSetNodeData( T * pData );
+    T    * nodeGetNodeData(void );
     void   nodeSetNodePriority( unsigned char priority );
     unsigned char nodeGetNodePriority( void );
 };
