@@ -9,12 +9,12 @@ private:
     node<T>       * pHeadNode;
     unsigned char   nodeCount; 
 public:
-    list( void );
+    //list( void );
     list( unsigned char maxSize );
-    list( T * pData );
-    list( unsigned char size, unsigned char priority );
-    list( unsigned char priority, T * pData );
-    list( unsigned char size, unsigned char priority, T * pData );
+    //list( T * pData );
+    //list( unsigned char size, unsigned char priority );
+    //list( unsigned char priority, T * pData );
+    //list( unsigned char size, unsigned char priority, T * pData );
 
     unsigned char listCreateList( node<T> * pNode[], unsigned char size );
     void listDestroyList( void );
@@ -28,11 +28,11 @@ public:
 
     unsigned char listInsertNodeByAcsendingPriority( node<T> * pNode );
     unsigned char listInsertNodeByAcsendingPriority( node<T> * pNode, T * pData );
-    unsigned char listInsertNodeByAcsendingPriority( node<T> * pNode, unsigned char position );
+    //unsigned char listInsertNodeByAcsendingPriority( node<T> * pNode, unsigned char position );
 
     unsigned char listInsertNodeByDescendingPriority( node<T> * pNode );
     unsigned char listInsertNodeByDescendingPriority( node<T> * pNode, T * pData );
-    unsigned char listInsertNodeByDescendingPriority( node<T> * pNode, unsigned char position );
+    //unsigned char listInsertNodeByDescendingPriority( node<T> * pNode, unsigned char position );
 
     unsigned char listInsertFirstNode( node<T> * pNode );
     unsigned char listInsertLastNode( node<T> * pNode );

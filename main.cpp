@@ -1,52 +1,42 @@
 #include "cortex-m3.h"
+#include "int.h"
 #include "list.h"
+#include<task.h>
 
-static volatile unsigned int s[4] = {0xA,0xB,0xC,0xD};
-static cortex_m3_cpu obj1(11);
+void task1(void);
+void task2(void);
+static uint32_t stack1[50];
+static uint32_t stack2[50];
 extern int flash_sdata;
 extern int ram_sdata;
 extern int ram_edata;
 extern int ram_0data;
+uint8_t taskStart[2];
+list<task> taskList1(6);
+task tasks[2];
+node<task> taskNode1(&tasks[0]);
+node<task> taskNode2(&tasks[1]);
 
-static node<int> listNode1;
-static node<int> listNode2;
-static node<int> listNode3;
-static node<int> listNode4;
-static node<int> listNode5;
-static list<int> taskList(6);
+inline void static_init()
+{
+    // Start and end points of the constructor list,
+    // defined by the linker script.
+    extern void (*__init_array_start)();
+    extern void (*__init_array_end)();
 
-
-    extern unsigned int __init_array_start;
-    extern unsigned int __init_array_end;
-
-    inline void static_init()
-    {
-        unsigned int  * pFuncStart;
-        unsigned int  * pFuncEnd;
-        unsigned int  * pTemp;
-        void  (* pFuncCount)();
-
-        pFuncStart = (unsigned int *)&__init_array_start;
-        pFuncEnd   = (unsigned int *)&__init_array_end;
-
-        for( pTemp = pFuncStart; pTemp < pFuncEnd; pTemp++ )
-        {
-            pFuncCount = (void (*)())(*pTemp);
-            pFuncCount();
-        } 
+    // Call each function in the list.
+    // We have to take the address of the symbols, as __init_array_start *is*
+    // the first function pointer, not the address of it.
+    for (void (**p)() = &__init_array_start; p < &__init_array_end; ++p) {
+        (*p)();
     }
-
+}
 void copyDataToRam( void )
 {
     unsigned int * pEnd;
-    unsigned int   size;
-    unsigned int * pSrc;
     unsigned int * pDst;
-    unsigned int * rSrc;  
     unsigned int * addr;
 
-    rSrc  = (unsigned int *) &ram_0data;
-    pSrc  = (unsigned int *) &flash_sdata; 
     pDst  = (unsigned int *) &ram_sdata; 
     pEnd  = (unsigned int *) &ram_edata; 
     addr  = (unsigned int *)((unsigned int)&flash_sdata + (unsigned int)&ram_sdata - (unsigned int)&ram_0data);
@@ -58,31 +48,47 @@ void copyDataToRam( void )
          addr++;  
     } 
 }
-
-__attribute__((section(".test"))) volatile void test_func(void)
+volatile uint32_t x;
+volatile uint32_t y;
+__attribute__((section(".test1"))) void test_func(void)
 {
-    static volatile unsigned int res;
- 
-    node<int> * pNode[5]= { NULL, NULL, NULL, NULL, NULL};
-    node<int> * pLastNode = NULL;
-    
+    char name1[10] = "task1";
+    char name2[10] = "task2"; 
+    node<task> * pTaskNode[2];
+    taskStart[0] = 0x00;
+    taskStart[1] = 0x00;
+    pTaskNode[0] = &taskNode1;
+    pTaskNode[1] = &taskNode2;
+    x = 0;
+    y = 0;
+
+    clockSetup();    
+    systickSetup();
     copyDataToRam();
     static_init();
-    pNode[0] = &listNode1;
-    pNode[1] = &listNode2;
-    pNode[2] = &listNode3;
-    pNode[3] = &listNode4;
-    pNode[4] = &listNode5;
-    taskList.listCreateList( pNode, 5 );   
-    pLastNode = taskList.listGetNodeByPosition(0);
-    pLastNode = taskList.listGetNodeByPosition(1);
-    pLastNode = taskList.listGetNodeByPosition(2);
-    pLastNode = taskList.listGetNodeByPosition(3);
-    pLastNode = taskList.listGetNodeByPosition(4);
-    res = obj1.GetR0();
-    res = obj1.GetR1();
-    res = obj1.GetR2();
-    obj1.saveCpuRegisters();
-    obj1.restoreCpuRegisters();    
+    taskNode1.pNodeData->taskCreateTask(name1, &stack1[0], 50, 30, task1 );
+    taskNode2.pNodeData->taskCreateTask(name2, &stack2[0], 50, 31, task2 );  
+    taskList1.listCreateList( pTaskNode, 2 );     
+    while(x < 2);
+    while(y < 2);
+    while(1);
 }
 
+void task1(void)
+{
+    do
+    {
+        x++;
+        x++;
+    }while(1);
+}
+
+void task2(void)
+{
+    do
+    {
+        y++;
+        y++;
+    }
+    while(1);
+}

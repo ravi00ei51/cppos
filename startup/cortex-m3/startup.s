@@ -1,5 +1,5 @@
 .section ".datax"
-val1:    .4byte 0x20005000        @ Read-only array of bytes
+val1:    .4byte 0x20004000        @ Read-only array of bytes
 val2:    .4byte start+1
 val3:    .4byte reset1
 val4:    .4byte reset2
@@ -10,13 +10,14 @@ val8:    .4byte reset6
 val9:    .4byte reset7
 val10:   .4byte reset8
 val11:   .4byte reset9
-val12:   .4byte reset10
-val13:   .4byte reset11+1
-val14:   .4byte reset12+1
-val15:   .4byte reset13+1
-val16:   .4byte reset14+1
-val17:   .4byte reset15+1
-val18:   .4byte reset16+1
+val12:   .4byte __test_start+1
+val13:   .4byte __test_start+1
+val14:   .4byte __test_start+1
+val15:   .4byte __test_start+1
+val16:   .4byte __test_start+1
+val17:   .4byte __test_start+1
+val18:   .4byte __test_start+1
+
 
         .text
 reset1:  b reset1
@@ -38,20 +39,7 @@ reset16: b reset16
 .align 
 
 start:                           @ Label, not really required
-        mov   r4, #4             @ Load register r0 with the value 5
-        mov   r5, #5             @ Load register r1 with the value 4
-        add   r6, r4, r5         @ Add r0 and r1 and store in r2
-        ldr   r4, =0x40021000
-        str   r1, [r4]
-#        ldr   r0, =flash_sdata
-#        ldr   r1, =ram_sdata
-#        ldr   r2, =ram_data_size
-copy:
-#        ldmia   r0, {r3}
-#        stmia   r1, {r3}
-#        cmp     r1,r2
-#        bne   copy
         cpsie i
-        bl 0x08003000
+        bl __test1_start+1
 stop:   b stop                   @ Infinite loop to stop execution
 

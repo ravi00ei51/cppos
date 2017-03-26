@@ -11,9 +11,9 @@ public:
     T    * pNodeData;
     unsigned char priority;
     unsigned int  dataSize;
-    node( void );
+    //node( void );
     node( T * pData );
-    ~node( void );
+    //~node( void );
     void   nodeSetNodeData( T * pData );
     T    * nodeGetNodeData(void );
     void   nodeSetNodePriority( unsigned char priority );

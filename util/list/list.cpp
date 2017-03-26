@@ -1,9 +1,9 @@
 #include "list.h"
-
-template <class T> list<T>::list( void )
+#include "task.h"
+/*template <class T> list<T>::list( void )
 {
 }
-
+*/
 template <class T> list<T>::list( unsigned char maxSize )
 {
     this->listMaxSize = maxSize;
@@ -11,7 +11,7 @@ template <class T> list<T>::list( unsigned char maxSize )
     this->nodeCount   = 0;
 }
 
-template <class T> list<T>::list( T * pData )
+/*template <class T> list<T>::list( T * pData )
 {
 }
 
@@ -25,9 +25,9 @@ template <class T> list<T>::list( unsigned char priority, T * pData )
 
 template <class T> list<T>::list( unsigned char size, unsigned char priority, T * pData )
 {
-}
+}*/
 
-template <class T> unsigned char list<T>::listCreateList( node<T> * pNode[], unsigned char size )
+template <class T>  unsigned char list<T>::listCreateList( node<T> * pNode[], unsigned char size )
 {
     unsigned char i = 0;
     unsigned char isAnyGivenNodeNULL = 0;
@@ -53,7 +53,8 @@ template <class T> unsigned char list<T>::listCreateList( node<T> * pNode[], uns
                 pNode[i+1]->pPrevNode = pNode[i];   
             }
             pNode[i]->pNextNode = NULL;
-            retVal = i+1;
+            i++;
+            retVal = i;
         }
     }
     this->nodeCount = retVal;      
@@ -217,10 +218,11 @@ template <class T> unsigned char list<T>::listRemoveNode( node<T> * pNode )
 
 template <class T> unsigned char list<T>::listRemoveNode( unsigned char position )
 {
-    node<T> * pTempNode;
+    node<T> * pTempNode = NULL;
     node<T> * pNode1;
     node<T> * pNode2;
     unsigned char i;
+
     if( this->pHeadNode != NULL )
     {
         pTempNode = this->pHeadNode;
@@ -298,7 +300,8 @@ template <class T> unsigned char list<T>::listInsertNodeByAcsendingPriority( nod
         pNode->pNextNode = NULL;
         pNode->pPrevNode = NULL;
  
-    }    
+    }   
+    return (unsigned char)0; 
 }
 
 template <class T> unsigned char list<T>::listInsertNodeByAcsendingPriority( node<T> * pNode, T * pData )
@@ -346,6 +349,7 @@ template <class T> unsigned char list<T>::listInsertNodeByAcsendingPriority( nod
 
     } 
     pNode->nodeSetNodeData( pData );  
+    return (unsigned char)0;
 }
 
 template <class T> unsigned char list<T>::listInsertNodeByDescendingPriority( node<T> * pNode )
@@ -394,7 +398,8 @@ template <class T> unsigned char list<T>::listInsertNodeByDescendingPriority( no
         pNode->pPrevNode = NULL;
 
     }
-
+    
+    return (unsigned char)0;
 }
 
 template <class T> unsigned char list<T>::listInsertNodeByDescendingPriority( node<T> * pNode, T * pData )
@@ -441,7 +446,8 @@ template <class T> unsigned char list<T>::listInsertNodeByDescendingPriority( no
         pNode->pPrevNode = NULL;
 
     }
-
+    pNode->nodeSetNodeData( pData );
+    return (unsigned char)0;
 }
 
 template <class T> unsigned char list<T>::listInsertFirstNode( node<T> * pNode )
@@ -462,6 +468,7 @@ template <class T> unsigned char list<T>::listInsertFirstNode( node<T> * pNode )
         pNode->pNextNode = NULL;
         pNode->pPrevNode = NULL;
     }
+    return (unsigned char)0;
 }
 
 template <class T> unsigned char list<T>::listInsertLastNode( node<T> * pNode )
@@ -486,6 +493,7 @@ template <class T> unsigned char list<T>::listInsertLastNode( node<T> * pNode )
         pNode->pNextNode = NULL;
         pNode->pPrevNode = NULL;
     }
+    return (unsigned char)0;
 }
 
 template <class T> unsigned char list<T>::listRemoveFirstNode( node<T> * pNode )
@@ -493,6 +501,7 @@ template <class T> unsigned char list<T>::listRemoveFirstNode( node<T> * pNode )
     node<T> * pNode1;
     if( this->pHeadNode == NULL )
     {
+        pNode = NULL;
     }
     else
     {
@@ -502,6 +511,7 @@ template <class T> unsigned char list<T>::listRemoveFirstNode( node<T> * pNode )
         this->pHeadNode = pNode1;
     }
     
+    return (unsigned char)0;
 }
 
 template <class T> unsigned char list<T>::listRemoveLastNode( node<T> * pNode )
@@ -523,14 +533,15 @@ template <class T> unsigned char list<T>::listRemoveLastNode( node<T> * pNode )
     else
     {
 
-    }    
+    }
+    return (unsigned char)0;    
 }
 
 
 template <class T> node<T> * list<T>::listGetNodeByPriority( unsigned char priority )
 {
     node<T> * pTempNode;
-    unsigned char tempPriority;
+    unsigned char tempPriority = 0xFF;
     pTempNode = this->pHeadNode;
     if( pTempNode != NULL )
     {
@@ -549,9 +560,8 @@ template <class T> node<T> * list<T>::listGetNodeByPriority( unsigned char prior
 template <class T> node<T> * list<T>::listGetNodeByPosition( unsigned char position )
 {
     node<T> * pTempNode;
-    node<T> * pNode1;
-    node<T> * pNode2;
     unsigned char i;
+
     pTempNode = this->pHeadNode;
     
     if( pTempNode != NULL )
@@ -600,4 +610,5 @@ template <class T> node<T> * list<T>::listGetLastNode( void )
 
     return pTempNode;
 }
-template class list<int>; 
+template class list<task>; 
+
