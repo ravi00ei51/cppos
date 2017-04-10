@@ -1,614 +1,549 @@
+#include "node.h"
 #include "list.h"
 #include "task.h"
-/*template <class T> list<T>::list( void )
+template <class T, uint32_t MAX_NUMBER_OF_NODES> list<T, MAX_NUMBER_OF_NODES>::list( void )
 {
-}
-*/
-template <class T> list<T>::list( unsigned char maxSize )
-{
-    this->listMaxSize = maxSize;
-    this->pHeadNode   = NULL;
-    this->nodeCount   = 0;
-}
-
-/*template <class T> list<T>::list( T * pData )
-{
-}
-
-template <class T> list<T>::list( unsigned char size, unsigned char priority )
-{
-}
-
-template <class T> list<T>::list( unsigned char priority, T * pData )
-{
-}
-
-template <class T> list<T>::list( unsigned char size, unsigned char priority, T * pData )
-{
-}*/
-
-template <class T>  unsigned char list<T>::listCreateList( node<T> * pNode[], unsigned char size )
-{
-    unsigned char i = 0;
-    unsigned char isAnyGivenNodeNULL = 0;
-    unsigned char retVal = 0;
-    if( (pNode != NULL ) )
+    uint8_t i;
+    for( i = 0; i < MAX_NUMBER_OF_NODES; i++ )
     {
-        for( i = 0; i < size; i++ )
-        {
-            if( pNode[i] == NULL )
-            {
-                isAnyGivenNodeNULL = 1;
-            }
-        }
-       
-        if( ( size <= this->listMaxSize ) && ( size >= 1 ) && ( isAnyGivenNodeNULL == 0 ) )
-        {
-            this->pHeadNode = pNode[0];
-            pNode[0]->pPrevNode = NULL;
+        this->listNodes[i].pPrev = NULL;
+        this->listNodes[i].pNext = NULL;
+        this->listNodes[i].pData = NULL;
+    }  
+    this->pHeadNode     = NULL;  
+    this->listNodeCount = 0u;
+}
 
-            for( i = 0; i < size-1; i++ )
+/*template <class T, uint32_t MAX_NUMBER_OF_NODES> list<T, MAX_NUMBER_OF_NODES>::list( T * pData[], uint8_t numberOfNodes )
+{
+    uint8_t i;
+    node<T> * pNode = NULL;
+    node<T> * pLastNode = NULL;
+    for( i = 0; i < MAX_NUMBER_OF_NODES; i++ )
+    {
+        this->listNodes[i].pPrev = NULL;
+        this->listNodes[i].pNext = NULL;
+        this->listNodes[i].pData = NULL;
+    }
+    
+    if( numberOfNodes < MAX_NUMBER_OF_NODES )
+    {
+        for( i = 0; i < numberOfNodes; i++ )
+        {
+            pLastNode = pNode;
+            pNode = this->listAllocateNode();
+            if( pNode != NULL )
             {
-                pNode[i]->pNextNode   = pNode[i + 1];
-                pNode[i+1]->pPrevNode = pNode[i];   
+                if( i == 0 )
+                {
+                    this->pHeadNode = pNode;
+                    pNode->pPrev    = NULL;
+                }
+                else if( i == ( numberOfNodes - 1 ) )
+                {
+                    pLastNode->pNext = pNode;
+                    pNode->pPrev     = pLastNode;
+                    pNode->pNext     = NULL;
+                }
+                else
+                {
+                    pLastNode->pNext = pNode;
+                    pNode->pPrev     = pLastNode;
+                }
+                this->listNodeCount++; 
             }
-            pNode[i]->pNextNode = NULL;
-            i++;
-            retVal = i;
+            else
+            {
+                break;
+            }         
         }
     }
-    this->nodeCount = retVal;      
+    else
+    {
+    }
+     
+}*/
+
+template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>::listInsertNodeData( T *& pData )
+{
+    node<T> * pTempNode;
+    node<T> * pNode;
+    BOOLEAN   retVal;
+
+    if( pData != NULL )
+    {
+        if( this->listNodeCount < maxNumberOfNodes )
+        {
+            pTempNode    = this->pHeadNode;
+            pNode        = this->listAllocateNode();
+            pNode->pData = pData;
+
+            if( pNode != NULL )
+            {
+                if( pTempNode != NULL )
+                {
+                    while( pTempNode->pNext != NULL )
+                    {
+                           pTempNode = pTempNode->pNext;
+                    }     
+                    pTempNode->pNext = pNode;
+                    pNode->pPrev     = pTempNode;
+                    pNode->pNext     = NULL;
+                }
+                else
+                {
+                    this->pHeadNode = pNode;
+                    pNode->pNext    = NULL;
+                    pNode->pPrev    = NULL;
+                }
+                retVal = TRUE;
+                this->listNodeCount++;
+            }
+            else
+            {
+                retVal = FALSE;
+            }   
+        }
+        else
+        {
+            retVal = FALSE;
+        }   
+    }
+    else
+    {
+        retVal = FALSE;
+    }
+
     return retVal;
 }
 
-template <class T> void list<T>::listDestroyList( void )
-{
-    this->pHeadNode = NULL;
-}
-
-template <class T> unsigned char list<T>::listInsertNode( node<T> * pNode )
+template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>::listRemoveNodeData( T *& pData )
 {
     node<T> * pTempNode;
-    if( this->pHeadNode == NULL )
-    {
-        this->pHeadNode  = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
-    }
-    else
-    {
-        pTempNode = this->pHeadNode;
+    node<T> * pNode;   
+    BOOLEAN   retVal;
 
-        while( pTempNode->pNextNode != NULL )
+    pTempNode = this->pHeadNode;
+
+    if( ( this->listNodeCount > 0 ) && ( this->listNodeCount <= maxNumberOfNodes ) )
+    {
+        if( pTempNode != NULL )
         {
-            pTempNode = pTempNode->pNextNode;
-        }
-
-        pTempNode->pNextNode = pNode;  
-        pNode->pPrevNode     = pTempNode;
-    }
-    if( this->nodeCount < this->listMaxSize )
-    {
-        this->nodeCount++;
-    }
-    return this->nodeCount;
-}
-
-template <class T> unsigned char list<T>::listInsertNode( node<T> * pNode, T * pData )
-{
-    node<T> * pTempNode;
-    if( this->pHeadNode == NULL )
-    {
-        this->pHeadNode  = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
-    }
-    else
-    {
-        pTempNode = this->pHeadNode;
-
-        while( pTempNode->pNextNode != NULL )
-        {
-            pTempNode = pTempNode->pNextNode;
-        }
-
-        pTempNode->pNextNode = pNode;  
-        pNode->pPrevNode     = pTempNode;
-    }
-    if( this->nodeCount < this->listMaxSize )
-    {
-        this->nodeCount++;
-    }
-    pNode->nodeSetNodeData( pData );
-
-    return this->nodeCount; 
-}
-
-template <class T> unsigned char list<T>::listInsertNode( node<T> * pNode, unsigned char position )
-{
-    node<T> * pTempNode = NULL;
-    node<T> * pNode1 = NULL;
-    node<T> * pNode2 = NULL;
-    unsigned char i = 0;
-
-    if( this->pHeadNode != NULL )
-    {
-        pTempNode = this->pHeadNode;
-        for( i = 0; i < position-1; i++ )
-        {
-            if( pTempNode->pNextNode == NULL )
+            while( pTempNode->pNext != NULL )
             {
-                break;
+                pTempNode = pTempNode->pNext; 
+            }
+            if( pTempNode->pPrev != NULL )
+            {
+                pNode            = pTempNode;
+                pData            = pNode->pData;
+                pTempNode        = pNode->pPrev;
+                pTempNode->pNext = NULL;  
+                pNode->pNext     = NULL;
+                this->listNodeCount--;
+                this->listFreeNode(pNode);
+                retVal = TRUE;
             }
             else
             {
-                pTempNode = pTempNode->pNextNode;
+                pNode            = pTempNode;
+                pData            = pNode->pData;
+                pTempNode->pNext = NULL;
+                pNode->pNext     = NULL;
+                pNode->pNext     = NULL;
+                this->listNodeCount--;
+                this->listFreeNode(pNode);
+                retVal = TRUE;
             }
-        }
-    }
-    else
-    {
-        this->pHeadNode  = pNode;
-        pNode->pPrevNode = NULL;
-        pNode->pNextNode = NULL;
-        this->nodeCount++;
-    }
-    
-    if( pTempNode != NULL )
-    {
-        if( pTempNode->pNextNode != NULL )
-        {
-            pNode1 = pTempNode;
-            pNode2 = pTempNode->pNextNode;
-
-            pNode1->pNextNode = pNode;
-            pNode->pPrevNode  = pNode1;
-            pNode->pNextNode  = pNode2;
-            pNode2->pPrevNode = pNode;
-            this->nodeCount++;
         }
         else
         {
-            pTempNode->pNextNode = pNode;
-            pNode->pPrevNode     = pTempNode;   
-            pNode->pNextNode     = NULL;  
-            this->nodeCount++;       
+            retVal = FALSE;
         }
-    }
-    return this->nodeCount; 
-}
-
-template <class T> unsigned char list<T>::listRemoveNode( node<T> * pNode )
-{
-    node<T> * pNode1;
-    node<T> * pNode2;
-    if( ( pNode->pPrevNode != NULL ) && ( pNode->pNextNode != NULL ) )
-    {
-        pNode1 = pNode->pPrevNode;
-        pNode2 = pNode->pNextNode;
-
-        pNode1->pNextNode = pNode2;
-        pNode2->pPrevNode = pNode1;
-        pNode->pNodeData  = NULL;
-        this->nodeCount--;
-    }
-    else if( ( pNode->pPrevNode != NULL ) && ( pNode->pNextNode == NULL ) )
-    {
-        pNode1 = pNode->pPrevNode;
-
-        pNode1->pNextNode = NULL;
-        pNode->pNodeData  = NULL;   
-        this->nodeCount--;
-    }
-    else if( ( pNode->pPrevNode == NULL ) && ( pNode->pNextNode != NULL ) )
-    {
-        pNode2 = pNode->pNextNode;
-
-        this->pHeadNode   = pNode2;
-        pNode2->pPrevNode = NULL;
-        pNode->pNodeData  = NULL;
-        this->nodeCount--;
     }
     else
     {
-        
+        retVal = FALSE;
     }
-    return this->nodeCount;
+    return retVal;
 }
 
-template <class T> unsigned char list<T>::listRemoveNode( unsigned char position )
+template <typename T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>::listInsertNodeData( T *& pData, uint8_t pos )
 {
-    node<T> * pTempNode = NULL;
-    node<T> * pNode1;
-    node<T> * pNode2;
-    unsigned char i;
+    uint8_t   i;
+    node<T> * pTempNode1 = NULL;
+    node<T> * pTempNode2 = NULL;
+    node<T> * pNode;
+    BOOLEAN   retVal;
 
-    if( this->pHeadNode != NULL )
-    {
-        pTempNode = this->pHeadNode;
-        for( i = 0; i < position; i++ )
+    if( this->listNodeCount < maxNumberOfNodes )
+    {   
+        if( pos <= maxNumberOfNodes )
         {
-            pTempNode = pTempNode->pNextNode;
-            if( pTempNode == NULL )
+            pNode = this->listAllocateNode();  
+
+            if( pNode != NULL )
             {
-                break;
+                pTempNode1   = this->pHeadNode;
+                pNode->pData = pData;  
+                
+                if( pTempNode1 != NULL )
+                {
+                    for( i = 0; ( i < ( pos -1 ) ) && ( pTempNode1 != NULL ); i++ )
+                    {
+                        pTempNode2 = pTempNode1;
+                        pTempNode1 = pTempNode1->pNext;         
+                    }
+
+                    if( ( i == ( pos - 1 ) ) )
+                    {
+                        if( pTempNode1 != NULL )
+                        {
+                            pTempNode2->pNext = pNode;
+                            pTempNode1->pPrev = pNode;
+                            pNode->pNext      = pTempNode1;
+                            pNode->pPrev      = pTempNode2;
+                            retVal            = TRUE;
+                            this->listNodeCount++;
+                        }
+                        else
+                        {
+                            pTempNode2->pNext = pNode;
+                            pNode->pNext      = NULL;
+                            pNode->pPrev      = pTempNode2;
+                            retVal            = TRUE;
+                            this->listNodeCount++;
+                        }  
+                    }
+                    else
+                    {
+                        retVal = FALSE;
+                    }
+                }
+                else
+                {
+                    if( pos == 1 )
+                    {
+                        this->pHeadNode  = pNode;
+                        pNode->pNext     = NULL;
+                        pNode->pPrev     = NULL;
+                        retVal           = TRUE; 
+                        this->listNodeCount++;
+                    }
+                    else
+                    {
+                        retVal       = FALSE;
+                    }
+                }
+            }
+            else
+            {
+                retVal = FALSE;
             }
         }
-    }
-    else
-    {
-        // List is empty. Nothing to remove.
-    }
-    if( pTempNode == NULL )
-    {
-        // Given position does not exist in the list. Nothing to remove.
-    }
-    else
-    {
-        pNode1 = pTempNode->pPrevNode;
-        pNode2 = pTempNode->pNextNode;
-
-        pNode1->pNextNode     = pNode2;
-        pNode2->pPrevNode     = pNode1;
-        pTempNode->pNodeData  = NULL;
-        this->nodeCount--;        
-    }
-    return this->nodeCount;
-}
-
-template <class T> unsigned char list<T>::listInsertNodeByAcsendingPriority( node<T> * pNode )
-{
-    unsigned char inserNodePriority;
-    unsigned char tempNodePriority;
-    node<T> *        pTempNode;
-    node<T> *        pNode1;
-    node<T> *        pNode2;
-
-    pTempNode = this->pHeadNode;
-    if( pTempNode != NULL )
-    {
-        tempNodePriority = pTempNode->nodeGetNodePriority();
-        inserNodePriority = pNode->nodeGetNodePriority();
-
-        while( ( inserNodePriority > tempNodePriority ) && ( pTempNode->pNextNode != NULL ) )
-        {
-            pTempNode        = pTempNode->pNextNode;
-            tempNodePriority = pTempNode->nodeGetNodePriority();
-        }
-        pNode1 = pTempNode;
-        pNode2 = pTempNode->pNextNode;
-        if( ( pNode1 != NULL ) && ( pNode2 != NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode2->pPrevNode = pNode;
-            pNode->pPrevNode  = pNode1;
-            pNode->pNextNode  = pNode2;
-        }
-        else if( ( pNode1 != NULL ) && ( pNode2 == NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode->pPrevNode = pNode1;
-            pNode->pNextNode = NULL;
-        }
         else
         {
-        } 
-    }
-    else
-    {
-        this->pHeadNode = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
- 
-    }   
-    return (unsigned char)0; 
-}
-
-template <class T> unsigned char list<T>::listInsertNodeByAcsendingPriority( node<T> * pNode, T * pData )
-{
-    unsigned char inserNodePriority;
-    unsigned char tempNodePriority;
-    node<T> *        pTempNode;
-    node<T> *        pNode1;
-    node<T> *        pNode2;
-    pTempNode = this->pHeadNode;
-    if( pTempNode != NULL )
-    {
-        tempNodePriority = pTempNode->nodeGetNodePriority();
-        inserNodePriority = pNode->nodeGetNodePriority();
-
-        while( ( inserNodePriority > tempNodePriority ) && ( pTempNode->pNextNode != NULL ) )
-        {
-            pTempNode        = pTempNode->pNextNode;
-            tempNodePriority = pTempNode->nodeGetNodePriority();
-        }
-        pNode1 = pTempNode;
-        pNode2 = pTempNode->pNextNode;
-        if( ( pNode1 != NULL ) && ( pNode2 != NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode2->pPrevNode = pNode;
-            pNode->pPrevNode  = pNode1;
-            pNode->pNextNode  = pNode2;
-        }
-        else if( ( pNode1 != NULL ) && ( pNode2 == NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode->pPrevNode = pNode1;
-            pNode->pNextNode = NULL;
-        }
-        else
-        {
+            retVal = FALSE;
         }
     }
     else
     {
-        this->pHeadNode = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
-
+        retVal = FALSE;
     } 
-    pNode->nodeSetNodeData( pData );  
-    return (unsigned char)0;
+    return retVal;   
 }
 
-template <class T> unsigned char list<T>::listInsertNodeByDescendingPriority( node<T> * pNode )
+
+template <typename T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>::listRemoveNodeData( T *& pData, uint8_t pos )
 {
-    unsigned char inserNodePriority;
-    unsigned char tempNodePriority;
-    node<T> *        pTempNode;
-    node<T> *        pNode1;
-    node<T> *        pNode2;
+    uint8_t   i;
+    node<T> * pTempNode1;
+    node<T> * pTempNode2;
+    node<T> * pNode;
+    BOOLEAN   retVal;
 
-    pTempNode = this->pHeadNode;
-
-    if( pTempNode != NULL )
+    if( ( this->listNodeCount <= maxNumberOfNodes ) && ( this->listNodeCount > 0 ) )
     {
-        tempNodePriority = pTempNode->nodeGetNodePriority();
-        inserNodePriority = pNode->nodeGetNodePriority();
-
-        while( ( inserNodePriority < tempNodePriority ) && ( pTempNode->pNextNode != NULL ) )
+        if( ( pos <= this->listNodeCount ) && ( pos > 0 ) )
         {
-            pTempNode        = pTempNode->pNextNode;
-            tempNodePriority = pTempNode->nodeGetNodePriority();
-        }
-        pNode1 = pTempNode;
-        pNode2 = pTempNode->pNextNode;
-        if( ( pNode1 != NULL ) && ( pNode2 != NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode2->pPrevNode = pNode;
-            pNode->pPrevNode  = pNode1;
-            pNode->pNextNode  = pNode2;
-        }
-        else if( ( pNode1 != NULL ) && ( pNode2 == NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode->pPrevNode = pNode1;
-            pNode->pNextNode = NULL;
-        }
-        else
-        {
-        }
-    }
-    else
-    {
-        this->pHeadNode = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
-
-    }
-    
-    return (unsigned char)0;
-}
-
-template <class T> unsigned char list<T>::listInsertNodeByDescendingPriority( node<T> * pNode, T * pData )
-{
-    unsigned char inserNodePriority;
-    unsigned char tempNodePriority;
-    node<T> *     pTempNode;
-    node<T> *     pNode1;
-    node<T> *     pNode2;
-    pTempNode = this->pHeadNode;
-    if( pTempNode != NULL )
-    {
-        tempNodePriority = pTempNode->nodeGetNodePriority();
-        inserNodePriority = pNode->nodeGetNodePriority();
-
-        while( ( inserNodePriority < tempNodePriority ) && ( pTempNode->pNextNode != NULL ) )
-        {
-            pTempNode        = pTempNode->pNextNode;
-            tempNodePriority = pTempNode->nodeGetNodePriority();
-        }
-        pNode1 = pTempNode;
-        pNode2 = pTempNode->pNextNode;
-        if( ( pNode1 != NULL ) && ( pNode2 != NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode2->pPrevNode = pNode;
-            pNode->pPrevNode  = pNode1;
-            pNode->pNextNode  = pNode2;
-        }
-        else if( ( pNode1 != NULL ) && ( pNode2 == NULL ) )
-        {
-            pNode1->pNextNode = pNode;
-            pNode->pPrevNode = pNode1;
-            pNode->pNextNode = NULL;
-        }
-        else
-        {
-        }
-    }
-    else
-    {
-        this->pHeadNode = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
-
-    }
-    pNode->nodeSetNodeData( pData );
-    return (unsigned char)0;
-}
-
-template <class T> unsigned char list<T>::listInsertFirstNode( node<T> * pNode )
-{
-    node<T> * pNode1;
-    if( this->pHeadNode != NULL )
-    {
-        pNode1 = this->pHeadNode;
-
-        this->pHeadNode   = pNode;
-        pNode->pNextNode  = pNode1;
-        pNode->pPrevNode  = NULL;
-        pNode1->pPrevNode = pNode;
-    }    
-    else
-    {
-        this->pHeadNode  = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
-    }
-    return (unsigned char)0;
-}
-
-template <class T> unsigned char list<T>::listInsertLastNode( node<T> * pNode )
-{
-    node<T> * pTempNode;
-    if( this->pHeadNode != NULL )
-    {
-        pTempNode = this->pHeadNode;
-
-        while( pTempNode->pNextNode != NULL )
-        {
-            pTempNode = pTempNode->pNextNode;
-        }
-
-        pTempNode->pNextNode = pNode;
-        pNode->pPrevNode     = pTempNode;
-        pNode->pNextNode     = NULL;
-    }
-    else
-    {
-        this->pHeadNode  = pNode;
-        pNode->pNextNode = NULL;
-        pNode->pPrevNode = NULL;
-    }
-    return (unsigned char)0;
-}
-
-template <class T> unsigned char list<T>::listRemoveFirstNode( node<T> * pNode )
-{
-    node<T> * pNode1;
-    if( this->pHeadNode == NULL )
-    {
-        pNode = NULL;
-    }
-    else
-    {
-        pNode = this->pHeadNode;
-        pNode1 = this->pHeadNode->pNextNode;
-        pNode1->pPrevNode = NULL;
-        this->pHeadNode = pNode1;
-    }
-    
-    return (unsigned char)0;
-}
-
-template <class T> unsigned char list<T>::listRemoveLastNode( node<T> * pNode )
-{
-    node<T> * pTempNode;
-
-    if( this->pHeadNode != NULL )
-    {
-        pTempNode = this->pHeadNode;
-
-        while( pTempNode->pNextNode != NULL )
-        {
-            pTempNode = pTempNode->pNextNode;
-        }
-        pNode = pTempNode;
+            pNode = this->pHeadNode;
         
-        pTempNode->pPrevNode->pNextNode = NULL;
-    }
-    else
-    {
-
-    }
-    return (unsigned char)0;    
-}
-
-
-template <class T> node<T> * list<T>::listGetNodeByPriority( unsigned char priority )
-{
-    node<T> * pTempNode;
-    unsigned char tempPriority = 0xFF;
-    pTempNode = this->pHeadNode;
-    if( pTempNode != NULL )
-    {
-        while( ( pTempNode != NULL ) && ( tempPriority != priority ) )
-        {
-            pTempNode = pTempNode->pNextNode;
-            tempPriority = pTempNode->nodeGetNodePriority(); 
-        } 
-    }
-    else
-    {
-    }
-    return pTempNode;
-}
-
-template <class T> node<T> * list<T>::listGetNodeByPosition( unsigned char position )
-{
-    node<T> * pTempNode;
-    unsigned char i;
-
-    pTempNode = this->pHeadNode;
+            if( pNode != NULL )
+            {
+                for( i = 0; (i < ( pos - 1 )) && ( pNode != NULL ); i++ )
+                {
+                    pNode = pNode->pNext;
+                }
+                if( ( i == ( pos - 1 ) ) && ( pNode != NULL ) )
+                {
+                    pData             = pNode->pData;
+                    pTempNode1        = pNode->pNext;
+                    pTempNode2        = pNode->pPrev;  
+                    if( ( pTempNode1 != NULL ) && ( pTempNode2 != NULL ) ) 
+                    {
+                        pTempNode2->pNext = pTempNode1;
+                        pTempNode1->pPrev = pTempNode2;
+                    }
+                    else if( ( pTempNode1 == NULL ) && ( pTempNode2 != NULL ) )
+                    {
+                        pTempNode2->pNext = NULL;
+                    }
+                    else if( ( pTempNode1 != NULL ) && ( pTempNode2 == NULL ) )
+                    {
+                        pTempNode1->pPrev = NULL;
+                        this->pHeadNode   = pTempNode1;
+                    }
+                    else 
+                    {
+                    }
     
-    if( pTempNode != NULL )
-    {
-        for( i = 0; i < position; i++ )
+                    pNode->pNext      = NULL;
+                    pNode->pPrev      = NULL;
+                    
+                    this->listFreeNode( pNode );
+                    this->listNodeCount--;
+                    retVal = TRUE;
+                }
+                else
+                {
+                    retVal = FALSE;
+                }
+            }
+            else
+            {
+                retVal = FALSE;
+            }
+        }
+        else
         {
+            retVal = FALSE;
+        }
+    }
+    else
+    {
+        retVal = FALSE;
+    }
+    return retVal;
+}
+
+template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>::listGetNodeData( T *& pData, uint8_t pos )
+{
+    node<T> * pTempNode;
+    uint8_t   i = 0;
+    BOOLEAN   retVal;
+
+    if( ( this->listNodeCount <= maxNumberOfNodes ) && ( this->listNodeCount > 0 ) )
+    {
+        if( ( pos <= this->listNodeCount ) && ( pos > 0 ) )
+        {
+            pTempNode = this->pHeadNode;
+            
             if( pTempNode != NULL )
             {
-                pTempNode = pTempNode->pNextNode;
+                for( i = 0; (i < ( pos - 1 ) ) && ( pTempNode->pNext != NULL ); i++ )
+                {
+                    pTempNode = pTempNode->pNext;
+                }
+                if(  i == ( pos - 1 ) )
+                {       
+                     pData = pTempNode->pData;
+                }
+                else
+                {
+                    pData  = NULL;
+                    retVal = FALSE;
+                }
             }
             else
             {
-                break; 
-            }  
+                pData  = NULL;
+                retVal = FALSE;
+            }
         }
-        
-    }
-    return pTempNode;
-}
-
-template <class T> node<T> * list<T>::listGetFirstNode( void )
-{
-    node<T> * pTempNode;
-
-    if( this->pHeadNode != NULL )
-    {
-        pTempNode = this->pHeadNode;
+        else
+        {
+            pData  = NULL;
+            retVal = FALSE;
+        }
     }
     else
     {
-        pTempNode = NULL;
+        pData  = NULL;
+        retVal = FALSE;
     }
 
-    return pTempNode;   
+    return retVal;
 }
 
-template <class T> node<T> * list<T>::listGetLastNode( void )
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listInsertFirstNodeData( T *& pData )
+{
+    node<T> * pTempNode;
+    
+    pTempNode = this->listAllocateNode();
+    
+    if( pTempNode != NULL )
+    {
+        pTempNode->pData = pData;
+        if( this->pHeadNode != NULL )
+        {
+            this->pHeadNode->pPrev = pTempNode;
+            pTempNode->pNext       = this->pHeadNode;
+            this->pHeadNode        = pTempNode;
+            pTempNode->pPrev       = NULL;
+        }
+        else
+        {
+            pTempNode->pNext       = NULL;
+            pTempNode->pPrev       = NULL;
+            this->pHeadNode        = pTempNode;  
+        } 
+    }
+}
+
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listRemoveFirstNodeData( T *& pData )
+{
+    node<T> * pTempNode;
+    
+    pTempNode              = this->pHeadNode;
+
+    if( pTempNode != NULL )
+    {
+        pData                  = pTempNode->pData;
+        this->pHeadNode        = pTempNode->pNext;
+        this->pHeadNode->pPrev = NULL;
+        this->listFreeNode( pTempNode );
+    }
+    else
+    {
+
+    }
+}
+
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listInsertLastNodeData( T *& pData )
+{
+    node<T> * pTempNode;
+    node<T> * pNode;
+
+    pTempNode = this->pHeadNode;
+    pNode     = this->listAllocateNode();
+    if( pNode != NULL )
+    {
+        pNode->pData = pData;
+
+        while( pTempNode->pNext != NULL )
+        {
+            pTempNode = pTempNode->pNext;
+        }
+    
+        if( pTempNode != NULL )
+        {
+            pTempNode->pNext = pNode;
+            pNode->pPrev     = pTempNode;    
+        }
+        else
+        {
+            this->pHeadNode = pNode;
+        }
+    }    
+}
+
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listRemoveLastNodeData( T *& pData )
+{
+    node<T> * pNode;
+    
+    pNode = this->pHeadNode;
+
+    if( pNode != NULL )
+    {
+        while( pNode->pNext != NULL )
+        {
+            pNode = pNode->pNext;
+        }
+
+        if( pNode != NULL )
+        {
+            pData               = pNode->pData;
+            pNode->pPrev->pNext = NULL;
+            pNode->pPrev        = NULL;
+            pNode->pData        = NULL;
+
+            this->listFreeNode(pNode);
+        }
+        else
+        {
+            this->pHeadNode = pNode;
+        }
+    }
+}
+
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listGetFirstNodeData( T *& pData )
+{
+    node<T> * pTempNode;
+
+    pTempNode = this->pHeadNode;
+
+    if( pTempNode != NULL )
+    {
+        pData = pTempNode->pData;
+    }
+    else
+    {
+        pData = NULL;
+    }
+}
+
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listGetLastNodeData( T *& pData )
+{
+    node<T> * pTempNode;
+
+    pTempNode = this->pHeadNode;
+    while( pTempNode->pNext != NULL )
+    {
+        pTempNode = pTempNode->pNext;
+    }
+    if( pTempNode != NULL )
+    {
+        pData = pTempNode->pData;
+    }
+    else
+    {
+        pData = NULL;
+    }    
+}
+template <class T, uint32_t MAX_NUMBER_OF_NODES> node<T> * list<T, MAX_NUMBER_OF_NODES>::listAllocateNode(void)
+{
+    uint8_t i;
+    for( i = 0; i < MAX_NUMBER_OF_NODES; i++ )
+    {
+        if( ( this->listNodes[i].pNext == NULL ) && ( this->listNodes[i].pPrev == NULL ) && ( this->listNodes[i].pData == NULL ) )
+        {
+             return (&this->listNodes[i]);
+        }
+    }
+    return (node<T> *)NULL;
+}
+
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listFreeNode( node<T> * pNode )
+{
+    pNode->pNext = NULL;
+    pNode->pPrev = NULL;
+    pNode->pData = NULL;
+}
+
+template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listPrintNodeData( void )
 {
     node<T> * pTempNode;
     pTempNode = this->pHeadNode;
-
-    while( pTempNode->pNextNode != NULL )
+    if( pTempNode != NULL )
     {
-        pTempNode = pTempNode->pNextNode;
+        while( pTempNode != NULL )
+        {
+            pTempNode = pTempNode->pNext;  
+        }
     }
-
-    return pTempNode;
+    else
+    {
+    }
 }
-template class list<task>; 
 
+template class list<task, 6>;

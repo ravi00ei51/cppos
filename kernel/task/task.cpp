@@ -1,5 +1,4 @@
 #include "task.h"
-#define NULL ((void*)0)
 /*task::task(void)
 {
 }

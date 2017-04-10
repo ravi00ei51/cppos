@@ -1,17 +1,16 @@
 #ifndef _H_NODE_H_
 #define _H_NODE_H_
-
-#define NULL                  ( 0U )
-
+#include "basetypes.h"
+//#define NULL                  ( 0U )
 template <class T>class node
 {
 public: 
-    node * pNextNode;
-    node * pPrevNode;
-    T    * pNodeData;
+    node * pNext;
+    node * pPrev;
+    T    * pData;
     unsigned char priority;
     unsigned int  dataSize;
-    //node( void );
+    node( void );
     node( T * pData );
     //~node( void );
     void   nodeSetNodeData( T * pData );

@@ -1,17 +1,16 @@
 #include "node.h"
 #include "task.h"
-/*template <class T> node<T>::node(void)
+template <class T> node<T>::node(void)
 {
-    this->pPrevNode = NULL;
-    this->pNextNode = NULL;
-    this->pNodeData = NULL;
-}*/
-
+    this->pNext = NULL;
+    this->pPrev = NULL;
+    this->pData = NULL;
+}
 template <class T> node<T>::node( T * pData )
 {
-    this->pPrevNode = NULL;
-    this->pNextNode = NULL;
-    this->pNodeData = pData;
+    this->pNext = NULL;
+    this->pPrev = NULL;
+    this->pData = pData;
 }
 
 /*template <class T> node<T>::~node(void)
@@ -20,12 +19,12 @@ template <class T> node<T>::node( T * pData )
 
 template <class T> void  node<T>::nodeSetNodeData( T * pData )
 {
-    this->pNodeData = pData;
+    this->pData = pData;
 }
 
 template <class T> T * node<T>::nodeGetNodeData( void )
 {
-    return this->pNodeData;
+    return this->pData;
 }
 
 template <class T> void node<T>::nodeSetNodePriority( unsigned char priority )

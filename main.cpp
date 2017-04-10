@@ -12,10 +12,8 @@ extern int ram_sdata;
 extern int ram_edata;
 extern int ram_0data;
 uint8_t taskStart[2];
-list<task> taskList1(6);
+list<task,6> taskList1;
 task tasks[2];
-node<task> taskNode1(&tasks[0]);
-node<task> taskNode2(&tasks[1]);
 
 inline void static_init()
 {
@@ -54,11 +52,11 @@ __attribute__((section(".test1"))) void test_func(void)
 {
     char name1[10] = "task1";
     char name2[10] = "task2"; 
-    node<task> * pTaskNode[2];
+    task * pTaskNode[2];
     taskStart[0] = 0x00;
     taskStart[1] = 0x00;
-    pTaskNode[0] = &taskNode1;
-    pTaskNode[1] = &taskNode2;
+    pTaskNode[0] = &tasks[0];
+    pTaskNode[1] = &tasks[1];
     x = 0;
     y = 0;
 
@@ -66,9 +64,10 @@ __attribute__((section(".test1"))) void test_func(void)
     systickSetup();
     copyDataToRam();
     static_init();
-    taskNode1.pNodeData->taskCreateTask(name1, &stack1[0], 50, 30, task1 );
-    taskNode2.pNodeData->taskCreateTask(name2, &stack2[0], 50, 31, task2 );  
-    taskList1.listCreateList( pTaskNode, 2 );     
+    tasks[0].taskCreateTask(name1, &stack1[0], 50, 30, task1 );
+    tasks[1].taskCreateTask(name2, &stack2[0], 50, 31, task2 );  
+    taskList1.listInsertNodeData( pTaskNode[0] );
+    taskList1.listInsertNodeData( pTaskNode[1] );     
     while(x < 2);
     while(y < 2);
     while(1);
