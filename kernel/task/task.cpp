@@ -1,11 +1,4 @@
 #include "task.h"
-/*task::task(void)
-{
-}
-
-task::~task(void)
-{
-}*/
 
 void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, uint8_t priority, taskFunctionType taskFunction )
 {   
@@ -34,6 +27,8 @@ void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, ui
     this->state         = TASK_STATE_SUSPENDED;  
     this->pTaskFunction = taskFunction;       
     this->cpuPrepareForExecution(pStack, (uint32_t *)taskFunction, size);
+    this->taskId        = (uint32_t)taskId;
+    this->delay         = 0u;
 }
 
 void task::taskDeleteTask( void )
@@ -84,7 +79,12 @@ void task::taskSetTaskPriority( uint8_t priority )
 {
     this->priority = priority;
 }
-
+uint8_t task::taskGetTaskPriority( uint32_t taskId )
+{
+    task * pTask;
+    pTask = getTaskByTaskId( taskId );
+    return pTask->priority;
+}
 void task::taskSetTaskState( taskStateType state )
 {
     this->state = state;
@@ -93,5 +93,114 @@ void task::taskSetTaskState( taskStateType state )
 taskStateType task::taskGetTaskState( void )
 {
     return this->state;
+}
+
+task * task::getTaskByTaskId( uint32_t taskId )
+{
+    return (task *)taskId;
+}
+
+list<task, 6> task::taskStateList[TASK_STATE_MAX];
+
+BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
+{
+    taskStateType  currentState;
+    BOOLEAN        retVal;
+    task         * pTask;
+
+    pTask = getTaskByTaskId( taskId );
+    currentState = pTask->state;
+
+    if( currentState == TASK_STATE_READY )
+    {
+        if( currentState != targetState )
+        {
+            taskStateList[currentState].listRemoveNodeData( pTask );
+            taskStateList[targetState].listInsertNodeData( pTask );  
+            pTask->state = targetState;
+            retVal = TRUE;
+        }
+        else
+        {
+            retVal = TRUE;
+        }
+    } 
+    else
+    {
+        if( targetState == TASK_STATE_READY )
+        {
+            taskStateList[currentState].listRemoveNodeData( pTask );
+            taskStateList[targetState].listInsertNodeData( pTask );
+            pTask->state = targetState;
+            retVal = TRUE;  
+        }
+        else
+        {
+            retVal = FALSE;
+        }
+    }
+    return retVal; 
+}
+
+BOOLEAN task::taskSuspendTask( uint32_t taskId )
+{
+    BOOLEAN retVal;
+    retVal = setTaskState( taskId, TASK_STATE_SUSPENDED );
+    return retVal;
+}
+
+BOOLEAN task::taskResumeTask( uint32_t taskId )
+{
+    BOOLEAN   retVal;
+    task    * pTask;
+
+    pTask = getTaskByTaskId( taskId );
+
+    if( pTask->state == TASK_STATE_SUSPENDED )
+    {
+        retVal = setTaskState( taskId, TASK_STATE_READY );
+    }
+    else
+    {
+        retVal = FALSE;
+    }
+    return retVal;
+}
+
+BOOLEAN task::taskPendTask( uint32_t taskId )
+{
+    BOOLEAN retVal;
+    retVal = setTaskState( taskId, TASK_STATE_PENDED );
+    return retVal;
+}
+
+BOOLEAN task::taskUnpendTask( uint32_t taskId )
+{
+    BOOLEAN   retVal;
+    task    * pTask;
+
+    pTask = getTaskByTaskId( taskId );
+
+    if( pTask->state == TASK_STATE_PENDED )
+    {
+        retVal = setTaskState( taskId, TASK_STATE_READY );
+    }
+    else
+    {
+        retVal = FALSE;
+    }
+    return retVal;
+}
+
+BOOLEAN task::taskDelayTask( uint32_t taskId, uint32_t delayInMs )
+{
+    BOOLEAN retVal;
+    task * pTask;
+    
+    pTask        = getTaskByTaskId( taskId );
+    pTask->delay = delayInMs;         
+    retVal       = setTaskState( taskId, TASK_STATE_WAIT );
+
+    return retVal;
 }
 

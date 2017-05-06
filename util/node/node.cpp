@@ -1,5 +1,6 @@
 #include "node.h"
 #include "task.h"
+#include "schedInfo.h"
 template <class T> node<T>::node(void)
 {
     this->pNext = NULL;
@@ -38,3 +39,4 @@ template <class T> unsigned char node<T>::nodeGetNodePriority( void )
 }
 
 template class node<task>;
+template class node<schedInfo>;
