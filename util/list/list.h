@@ -17,6 +17,7 @@ private:
 public:
     list( void );
     list( T * pData[], uint8_t numberOfNodes );
+    void listInit(void);
     node<T> * listAllocateNode(void);
     void    listFreeNode( node<T> * );
     BOOLEAN listInsertNodeData( T *& pData );
@@ -26,6 +27,7 @@ public:
     BOOLEAN listRemoveNodeData( T *& pData, uint8_t pos );
 
     BOOLEAN listGetNodeData( T *& pData, uint8_t pos );
+    uint8_t listGetNodePosition( T *& pData );
 
     void listInsertFirstNodeData( T *& pData );
     void listRemoveFirstNodeData( T *& pData );

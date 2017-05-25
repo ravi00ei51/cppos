@@ -1,6 +1,7 @@
 #include "cortex-m3.h"
 #include "int.h"
 #include "list.h"
+#include "schedInfo.h"
 #include<task.h>
 
 void task1(void);
@@ -14,7 +15,8 @@ extern int ram_0data;
 uint8_t taskStart[2];
 list<task,6> taskList1;
 task tasks[2];
-
+extern uint8_t schedInit;
+extern schedInfo schedI;
 inline void static_init()
 {
     // Start and end points of the constructor list,
@@ -59,6 +61,9 @@ __attribute__((section(".test1"))) void test_func(void)
     pTaskNode[1] = &tasks[1];
     x = 0;
     y = 0;
+    schedInit = FALSE;
+            schedI.taskId = 0;
+        schedI.priority = 0;
 
     clockSetup();    
     systickSetup();

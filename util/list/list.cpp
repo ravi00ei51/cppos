@@ -65,7 +65,18 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> list<T, MAX_NUMBER_OF_NODES>::l
     }
      
 }*/
-
+template <class T, uint32_t maxNumberOfNodes> void list<T, maxNumberOfNodes>::listInit(void)
+{
+    uint8_t i;
+    for( i = 0; i < maxNumberOfNodes; i++ )
+    {
+        this->listNodes[i].pPrev = NULL;
+        this->listNodes[i].pNext = NULL;
+        this->listNodes[i].pData = NULL;
+    }
+    this->pHeadNode     = NULL;
+    this->listNodeCount = 0u;    
+}
 template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>::listInsertNodeData( T *& pData )
 {
     node<T> * pTempNode;
@@ -377,6 +388,36 @@ template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>:
     return retVal;
 }
 
+template <class T, uint32_t maxNumberOfNodes> uint8_t list<T, maxNumberOfNodes>::listGetNodePosition( T *& pData )
+{
+    node<T> * pTempNode;
+    uint8_t   i = 0;
+    BOOLEAN   nodeFound;
+    
+    pTempNode = this->pHeadNode;    
+    
+    while( pTempNode != NULL )
+    {
+        if( pTempNode->pData == pData )
+        {
+            nodeFound = TRUE;
+        }
+
+        if( nodeFound == TRUE )
+        {
+            break;
+        }   
+
+        pTempNode = pTempNode->pNext;
+        i++;
+    }  
+    if( nodeFound == FALSE )
+    {
+        i = 0xFF;
+    }
+    return i;  
+}
+
 template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listInsertFirstNodeData( T *& pData )
 {
     node<T> * pTempNode;
@@ -411,8 +452,15 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
     if( pTempNode != NULL )
     {
         pData                  = pTempNode->pData;
-        this->pHeadNode        = pTempNode->pNext;
-        this->pHeadNode->pPrev = NULL;
+        if( pTempNode->pNext != NULL )
+        {
+            this->pHeadNode        = pTempNode->pNext;
+            this->pHeadNode->pPrev = NULL;
+        }
+        else
+        {
+            this->pHeadNode = NULL; 
+        }
         this->listFreeNode( pTempNode );
     }
     else
@@ -425,27 +473,34 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
 {
     node<T> * pTempNode;
     node<T> * pNode;
-
+    
     pTempNode = this->pHeadNode;
     pNode     = this->listAllocateNode();
     if( pNode != NULL )
     {
         pNode->pData = pData;
-
-        while( pTempNode->pNext != NULL )
-        {
-            pTempNode = pTempNode->pNext;
-        }
-    
         if( pTempNode != NULL )
         {
-            pTempNode->pNext = pNode;
-            pNode->pPrev     = pTempNode;    
+            while( pTempNode->pNext != NULL )
+            {
+                pTempNode = pTempNode->pNext;
+            }
+    
+            if( pTempNode != NULL )
+            {
+                pTempNode->pNext = pNode;
+                pNode->pPrev     = pTempNode;    
+            }
+            else
+            {
+                
+            }
         }
         else
         {
             this->pHeadNode = pNode;
         }
+
     }    
 }
 
@@ -468,13 +523,12 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
             pNode->pPrev->pNext = NULL;
             pNode->pPrev        = NULL;
             pNode->pData        = NULL;
-
-            this->listFreeNode(pNode);
         }
         else
         {
             this->pHeadNode = pNode;
         }
+        this->listFreeNode(pNode);
     }
 }
 

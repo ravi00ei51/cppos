@@ -4,6 +4,8 @@
 #include "basetypes.h"
 #include "cortex-m3.h"
 #include "list.h"
+#include "schedInfo.h"
+
 
 #define MAX_TASK_NAME_LENGTH (10u)
 
@@ -31,11 +33,10 @@ private:
     taskFunctionType      pTaskFunction;
     uint32_t              taskId;
     uint32_t              delay;
+    schedInfo             schedData;
     static list<task, 6>  taskStateList[TASK_STATE_MAX];
 
     static BOOLEAN setTaskState( uint32_t, taskStateType );
-    static taskStateType getTaskState( void );
-    static task * getTaskByTaskId( uint32_t taskId );
 
 public: 
     void           taskCreateTask( char * taskName, uint32_t * pStatck,uint32_t size, uint8_t priority, taskFunctionType taskFunction );
@@ -47,11 +48,14 @@ public:
     void           taskSetTaskPriority( uint8_t );
     taskStateType  taskGetTaskState(void);
     void           taskSetTaskState(taskStateType);
+    schedInfo *    taskGetSchedInfo( void );
     static BOOLEAN taskSuspendTask( uint32_t taskId );
     static BOOLEAN taskResumeTask( uint32_t taskId );
     static BOOLEAN taskDelayTask( uint32_t taskId, uint32_t delay );
     static BOOLEAN taskPendTask( uint32_t taskId );
     static BOOLEAN taskUnpendTask( uint32_t taskId );
+    static taskStateType getTaskState( void );
+    static task * getTaskByTaskId( uint32_t taskId );
 };   
 
 #endif

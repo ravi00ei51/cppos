@@ -27,8 +27,11 @@ void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, ui
     this->state         = TASK_STATE_SUSPENDED;  
     this->pTaskFunction = taskFunction;       
     this->cpuPrepareForExecution(pStack, (uint32_t *)taskFunction, size);
-    this->taskId        = (uint32_t)taskId;
+    this->taskId        = (uint32_t)this;
     this->delay         = 0u;
+
+    sched<SCHED_TYPE_RR>::schedInitSchedInfo( &(this->schedData) ); 
+    setTaskState( this->taskId, TASK_STATE_READY );
 }
 
 void task::taskDeleteTask( void )
@@ -100,6 +103,10 @@ task * task::getTaskByTaskId( uint32_t taskId )
     return (task *)taskId;
 }
 
+schedInfo * task::taskGetSchedInfo( void )
+{
+    return ( &(this->schedData) );
+}
 list<task, 6> task::taskStateList[TASK_STATE_MAX];
 
 BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
@@ -107,16 +114,24 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
     taskStateType  currentState;
     BOOLEAN        retVal;
     task         * pTask;
+    sched<SCHED_TYPE_RR>        * pSched;
+    schedInfo    * pSchedInfo;
 
-    pTask = getTaskByTaskId( taskId );
+    pTask        = getTaskByTaskId( taskId );
     currentState = pTask->state;
 
+    pSched     = sched<SCHED_TYPE_RR>::schedGetSchedInstance();
+    pSchedInfo = pTask->taskGetSchedInfo();
+
+    pSched->schedUpdateSchedInfo( taskId, pSchedInfo );
+    
     if( currentState == TASK_STATE_READY )
     {
         if( currentState != targetState )
         {
             taskStateList[currentState].listRemoveNodeData( pTask );
             taskStateList[targetState].listInsertNodeData( pTask );  
+            pSched->schedRemoveSchedInfo( pSchedInfo );
             pTask->state = targetState;
             retVal = TRUE;
         }
@@ -131,6 +146,7 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
         {
             taskStateList[currentState].listRemoveNodeData( pTask );
             taskStateList[targetState].listInsertNodeData( pTask );
+            pSched->schedInsertSchedInfo( pSchedInfo );
             pTask->state = targetState;
             retVal = TRUE;  
         }
@@ -139,6 +155,7 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
             retVal = FALSE;
         }
     }
+
     return retVal; 
 }
 
