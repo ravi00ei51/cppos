@@ -440,6 +440,10 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
             pTempNode->pPrev       = NULL;
             this->pHeadNode        = pTempNode;  
         } 
+        this->listNodeCount++;
+    }
+    else
+    {
     }
 }
 
@@ -462,6 +466,7 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
             this->pHeadNode = NULL; 
         }
         this->listFreeNode( pTempNode );
+        this->listNodeCount--;
     }
     else
     {
@@ -490,6 +495,7 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
             {
                 pTempNode->pNext = pNode;
                 pNode->pPrev     = pTempNode;    
+                this->listNodeCount++;
             }
             else
             {
@@ -499,6 +505,7 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
         else
         {
             this->pHeadNode = pNode;
+            this->listNodeCount++;
         }
 
     }    
@@ -529,6 +536,7 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
             this->pHeadNode = pNode;
         }
         this->listFreeNode(pNode);
+        this->listNodeCount--; 
     }
 }
 

@@ -49,6 +49,7 @@ void clockSetup( void )
 extern BOOLEAN schedInit;
 schedInfo schedI;
 static volatile uint32_t taskId;
+extern volatile uint32_t x;
 __attribute__((section(".test"))) void systickInterruptFunction( void )
 {
     //task * currentTask;
@@ -56,10 +57,10 @@ __attribute__((section(".test"))) void systickInterruptFunction( void )
     volatile uint32_t nextTaskId;
     task *   pCurrentTask;
     task *   pNextTask;
-    sched<SCHED_TYPE_RR> * pSched;
+    sched<SCHEDULER_TYPE> * pSched;
     asm("cpsid i");   
     nextTaskId = 0u;
-    pSched = sched<SCHED_TYPE_RR>::schedGetSchedInstance();
+    pSched = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
     currentTaskId = pSched->schedGetCurrentTaskForExecution();
     nextTaskId    = pSched->schedGetNextTaskForExecution();
     
@@ -71,14 +72,20 @@ __attribute__((section(".test"))) void systickInterruptFunction( void )
        pCurrentTask->cpuGetContext();
        asm("cpsie i");
        pNextTask->cpuSetContext();
-    } 
+    }
+    if( x == 0 )
+    {
+       pNextTask = task::getTaskByTaskId( nextTaskId );
+       asm("cpsie i");
+       pNextTask->cpuSetContext();
+    }    
      
     /*{
         if( ( taskStart[0] == 0x00 ) && ( taskStart[1] == 0x00 ) )
         {
             taskStart[0] = 0x01;
             taskList1.listGetNodeData(currentTask, 1);
-            asm("cpsie i");
+ sm("cpsie i");           asm("cpsie i");
             currentTask->cpuSetContext();
         }
         if( (taskStart[0] == 0x01 ) && ( taskStart[1] == 0x00 ) )

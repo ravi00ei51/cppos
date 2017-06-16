@@ -30,7 +30,7 @@ void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, ui
     this->taskId        = (uint32_t)this;
     this->delay         = 0u;
 
-    sched<SCHED_TYPE_RR>::schedInitSchedInfo( &(this->schedData) ); 
+    sched<SCHEDULER_TYPE>::schedInitSchedInfo( &(this->schedData) ); 
     setTaskState( this->taskId, TASK_STATE_READY );
 }
 
@@ -85,7 +85,7 @@ void task::taskSetTaskPriority( uint8_t priority )
 uint8_t task::taskGetTaskPriority( uint32_t taskId )
 {
     task * pTask;
-    pTask = getTaskByTaskId( taskId );
+    pTask = (task *)taskId;
     return pTask->priority;
 }
 void task::taskSetTaskState( taskStateType state )
@@ -97,10 +97,13 @@ taskStateType task::taskGetTaskState( void )
 {
     return this->state;
 }
-
+volatile uint32_t tempTaskId;
 task * task::getTaskByTaskId( uint32_t taskId )
 {
-    return (task *)taskId;
+    volatile task * pTask;
+    pTask = (task *)taskId; 
+    tempTaskId = taskId;
+    return (task *)pTask;
 }
 
 schedInfo * task::taskGetSchedInfo( void )
@@ -114,13 +117,13 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
     taskStateType  currentState;
     BOOLEAN        retVal;
     task         * pTask;
-    sched<SCHED_TYPE_RR>        * pSched;
+    sched<SCHEDULER_TYPE>        * pSched;
     schedInfo    * pSchedInfo;
 
-    pTask        = getTaskByTaskId( taskId );
+    pTask        = (task *)taskId;//getTaskByTaskId( taskId );
     currentState = pTask->state;
 
-    pSched     = sched<SCHED_TYPE_RR>::schedGetSchedInstance();
+    pSched     = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
     pSchedInfo = pTask->taskGetSchedInfo();
 
     pSched->schedUpdateSchedInfo( taskId, pSchedInfo );
@@ -171,7 +174,7 @@ BOOLEAN task::taskResumeTask( uint32_t taskId )
     BOOLEAN   retVal;
     task    * pTask;
 
-    pTask = getTaskByTaskId( taskId );
+    pTask = (task *)taskId; //getTaskByTaskId( taskId );
 
     if( pTask->state == TASK_STATE_SUSPENDED )
     {
@@ -196,7 +199,7 @@ BOOLEAN task::taskUnpendTask( uint32_t taskId )
     BOOLEAN   retVal;
     task    * pTask;
 
-    pTask = getTaskByTaskId( taskId );
+    pTask = (task * )taskId; //getTaskByTaskId( taskId );
 
     if( pTask->state == TASK_STATE_PENDED )
     {
@@ -214,7 +217,7 @@ BOOLEAN task::taskDelayTask( uint32_t taskId, uint32_t delayInMs )
     BOOLEAN retVal;
     task * pTask;
     
-    pTask        = getTaskByTaskId( taskId );
+    pTask        = (task*)taskId;//getTaskByTaskId( taskId );
     pTask->delay = delayInMs;         
     retVal       = setTaskState( taskId, TASK_STATE_WAIT );
 
