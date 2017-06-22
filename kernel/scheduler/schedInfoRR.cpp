@@ -41,10 +41,25 @@ template<> BOOLEAN sched<SCHED_TYPE_RR>::schedInsertSchedInfo( schedInfo * pSche
 template<> BOOLEAN sched<SCHED_TYPE_RR>::schedRemoveSchedInfo( schedInfo * pSchedInfo )
 {
     uint8_t pos;
-
-    pos = this->schedulerList.listGetNodePosition( pSchedInfo );
-    this->schedulerList.listRemoveNodeData( pSchedInfo, pos );
-    return TRUE;
+    BOOLEAN retVal;
+    if( pSchedInfo != NULL )
+    {
+        pos = this->schedulerList.listGetNodePosition( pSchedInfo );
+        if( pos != NODE_NOT_FOUND )
+        {
+            this->schedulerList.listRemoveNodeData( pSchedInfo, pos );
+            retVal = TRUE;
+        }
+        else
+        {
+            retVal = FALSE;
+        }
+    }
+    else
+    {
+        retVal = FALSE;
+    }
+    return retVal;
 }
 
 template<> uint32_t sched<SCHED_TYPE_RR>::schedGetNextTaskForExecution( void )

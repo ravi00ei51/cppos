@@ -202,7 +202,7 @@ template <typename T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNode
                 
                 if( pTempNode1 != NULL )
                 {
-                    for( i = 0; ( i < ( pos -1 ) ) && ( pTempNode1 != NULL ); i++ )
+                    for( i = 0; ( i < ( pos - 1 ) ) && ( pTempNode1 != NULL ); i++ )
                     {
                         pTempNode2 = pTempNode1;
                         pTempNode1 = pTempNode1->pNext;         
@@ -210,7 +210,7 @@ template <typename T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNode
 
                     if( ( i == ( pos - 1 ) ) )
                     {
-                        if( pTempNode1 != NULL )
+                        if( ( pTempNode1 != NULL ) && ( pTempNode2 != NULL ) )
                         {
                             pTempNode2->pNext = pNode;
                             pTempNode1->pPrev = pNode;
@@ -219,7 +219,7 @@ template <typename T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNode
                             retVal            = TRUE;
                             this->listNodeCount++;
                         }
-                        else
+                        else if( ( pTempNode1 == NULL ) && ( pTempNode2 != NULL ) )
                         {
                             pTempNode2->pNext = pNode;
                             pNode->pNext      = NULL;
@@ -227,6 +227,19 @@ template <typename T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNode
                             retVal            = TRUE;
                             this->listNodeCount++;
                         }  
+                        else if( ( pTempNode1 != NULL ) && ( pTempNode2 == NULL ) )
+                        {
+                            pNode->pNext      = pTempNode1;
+                            pNode->pPrev      = NULL;
+                            pTempNode1->pPrev = pNode;
+                            this->pHeadNode   = pNode;
+                            retVal            = TRUE;
+                            this->listNodeCount++;
+                        }
+                        else
+                        {
+                            retVal = FALSE;
+                        }
                     }
                     else
                     {
@@ -359,7 +372,8 @@ template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>:
                 }
                 if(  i == ( pos - 1 ) )
                 {       
-                     pData = pTempNode->pData;
+                     pData  = pTempNode->pData;
+                     retVal = TRUE;
                 }
                 else
                 {
@@ -391,7 +405,7 @@ template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>:
 template <class T, uint32_t maxNumberOfNodes> uint8_t list<T, maxNumberOfNodes>::listGetNodePosition( T *& pData )
 {
     node<T> * pTempNode;
-    uint8_t   i = 0;
+    uint8_t   i = 1;
     BOOLEAN   nodeFound;
     
     pTempNode = this->pHeadNode;    
@@ -410,10 +424,11 @@ template <class T, uint32_t maxNumberOfNodes> uint8_t list<T, maxNumberOfNodes>:
 
         pTempNode = pTempNode->pNext;
         i++;
-    }  
+    }
+      
     if( nodeFound == FALSE )
     {
-        i = 0xFF;
+        i = NODE_NOT_FOUND;
     }
     return i;  
 }

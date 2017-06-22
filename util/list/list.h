@@ -1,6 +1,7 @@
 #ifndef __H_LIST_H__
 #define __H_LIST_H__
 #include "node.h"
+#define NODE_NOT_FOUND   (0xFF)
 enum boolean
 {
     FALSE = 0,

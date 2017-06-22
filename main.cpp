@@ -16,6 +16,7 @@ uint8_t taskStart[2];
 list<task,6> taskList1;
 task tasks[2];
 extern uint8_t schedInit;
+extern uint8_t schedInit1;
 extern schedInfo schedI;
 inline void static_init()
 {
@@ -50,6 +51,8 @@ void copyDataToRam( void )
 }
 volatile uint32_t x;
 volatile uint32_t y;
+volatile uint32_t x1;
+volatile uint32_t y1;
 __attribute__((section(".test1"))) void test_func(void)
 {
     char name1[10] = "task1";
@@ -61,9 +64,12 @@ __attribute__((section(".test1"))) void test_func(void)
     pTaskNode[1] = &tasks[1];
     x = 0;
     y = 0;
+    x1 = 0;
+    y1 = 0;
     schedInit = FALSE;
-            schedI.taskId = 0;
-        schedI.priority = 0;
+    schedInit1 = FALSE;
+    schedI.taskId = 0;
+    schedI.priority = 0;
 
     clockSetup();    
     systickSetup();
@@ -79,11 +85,21 @@ __attribute__((section(".test1"))) void test_func(void)
 }
 
 void task1(void)
-{
+{  
     do
     {
         x++;
-        x++;
+        if( ( x == 10000 ) && ( x1 == 0 ) )
+        {
+            task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
+            x1 = 1;
+        }
+        if( ( x == 20000 ) && ( x1 == 1 ) )
+        {
+            task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
+            x1 = 2;
+        }   
+        
     }while(1);
 }
 
@@ -92,7 +108,12 @@ void task2(void)
     do
     {
         y++;
-        y++;
+        if( ( y == 10000 ) && ( y1 == 0 ) )
+        {
+            task::taskSetTaskPriority( (uint32_t)(&tasks[0]), (uint8_t)8 );
+            y1 = 1;
+        }
+        
     }
     while(1);
 }

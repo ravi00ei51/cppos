@@ -45,7 +45,7 @@ public:
     void           taskSetTaskName( char * name );
     uint8_t        taskGetTaskPriority( void );
     static uint8_t taskGetTaskPriority( uint32_t taskId );
-    void           taskSetTaskPriority( uint8_t );
+    static BOOLEAN taskSetTaskPriority( uint32_t taskId, uint8_t priority );
     taskStateType  taskGetTaskState(void);
     void           taskSetTaskState(taskStateType);
     schedInfo *    taskGetSchedInfo( void );

@@ -73,14 +73,49 @@ void task::taskSetTaskName( char * name )
     }
 }
 
-uint8_t task::taskGetTaskPriority( void )
+BOOLEAN task::taskSetTaskPriority( uint32_t taskId, uint8_t priority )
 {
-    return this->priority;
-}
+    task                  * pTask;
+    sched<SCHEDULER_TYPE> * pSched;
+    BOOLEAN                 val;
+    schedInfo             * pSchedInfo;
+    pTask = (task *)taskId;
 
-void task::taskSetTaskPriority( uint8_t priority )
-{
-    this->priority = priority;
+    if( pTask != NULL )
+    {
+        asm("cpsid i");
+        pTask->priority = priority;
+        if( pTask->state == TASK_STATE_READY )
+        {  
+            pSched = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
+            
+            if( pSched != NULL )
+            {
+                pSchedInfo = pTask->taskGetSchedInfo();
+                pSched->schedUpdateSchedInfo( taskId, pSchedInfo );
+                val = pSched->schedRemoveSchedInfo( pSchedInfo );
+
+                if( val == TRUE )
+                {
+                    val = pSched->schedInsertSchedInfo( pSchedInfo );  
+                } 
+            }
+            else
+            {
+                val = FALSE;
+            }
+        }
+        else
+        {
+            val = TRUE;
+        }
+        asm("cpsie i");   
+    }
+    else
+    {
+        val = FALSE;
+    }
+    return val;
 }
 uint8_t task::taskGetTaskPriority( uint32_t taskId )
 {
@@ -110,6 +145,7 @@ schedInfo * task::taskGetSchedInfo( void )
 {
     return ( &(this->schedData) );
 }
+
 list<task, 6> task::taskStateList[TASK_STATE_MAX];
 
 BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
@@ -120,7 +156,7 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
     sched<SCHEDULER_TYPE>        * pSched;
     schedInfo    * pSchedInfo;
 
-    pTask        = (task *)taskId;//getTaskByTaskId( taskId );
+    pTask        = getTaskByTaskId( taskId );
     currentState = pTask->state;
 
     pSched     = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
@@ -174,7 +210,7 @@ BOOLEAN task::taskResumeTask( uint32_t taskId )
     BOOLEAN   retVal;
     task    * pTask;
 
-    pTask = (task *)taskId; //getTaskByTaskId( taskId );
+    pTask = getTaskByTaskId( taskId );
 
     if( pTask->state == TASK_STATE_SUSPENDED )
     {
@@ -199,7 +235,7 @@ BOOLEAN task::taskUnpendTask( uint32_t taskId )
     BOOLEAN   retVal;
     task    * pTask;
 
-    pTask = (task * )taskId; //getTaskByTaskId( taskId );
+    pTask = getTaskByTaskId( taskId );
 
     if( pTask->state == TASK_STATE_PENDED )
     {
