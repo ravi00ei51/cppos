@@ -3,7 +3,7 @@
 #include "list.h"
 #include "schedInfo.h"
 #include<task.h>
-
+#include<atomic.h>
 void task1(void);
 void task2(void);
 static uint32_t stack1[50];
@@ -57,7 +57,14 @@ __attribute__((section(".test1"))) void test_func(void)
 {
     char name1[10] = "task1";
     char name2[10] = "task2"; 
+    atomic test;
+    atomic test1;
     task * pTaskNode[2];
+
+    test.lock();
+    test1.unblockingLock();
+    test.unlock();
+    test1.unlock();
     taskStart[0] = 0x00;
     taskStart[1] = 0x00;
     pTaskNode[0] = &tasks[0];
@@ -70,7 +77,7 @@ __attribute__((section(".test1"))) void test_func(void)
     schedInit1 = FALSE;
     schedI.taskId = 0;
     schedI.priority = 0;
-
+ 
     clockSetup();    
     systickSetup();
     copyDataToRam();
