@@ -80,4 +80,33 @@ template<> uint32_t sched<SCHED_TYPE_RR>::schedGetCurrentTaskForExecution( void 
     return (this->taskId);
 }
 
+template<> void sched<SCHED_TYPE_RR>::schedExecuteScheduler( void )
+{
+    volatile uint32_t currentTaskId;
+    volatile uint32_t nextTaskId;
+    task *            pCurrentTask;
+    task *            pNextTask;
+    sched<SCHED_TYPE_RR> * pSched;
+
+    asm("cpsid i");
+
+    nextTaskId = 0u;
+
+    pSched        = sched<SCHED_TYPE_RR>::schedGetSchedInstance();
+    currentTaskId = pSched->taskId;
+    
+    nextTaskId = pSched->schedGetNextTaskForExecution();
+    if( currentTaskId != nextTaskId )
+    {
+       pNextTask    = task::getTaskByTaskId( nextTaskId );
+       pCurrentTask = task::getTaskByTaskId( currentTaskId );
+
+       if( currentTaskId != 0 )
+           pCurrentTask->cpuGetContext();
+       asm("cpsie i");
+       pNextTask->cpuSetContext();
+    }  
+    asm("cpsie i");
+}   
+
 //template<SCHED_TYPE_RR> class sched;

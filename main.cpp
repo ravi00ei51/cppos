@@ -53,6 +53,7 @@ volatile uint32_t x;
 volatile uint32_t y;
 volatile uint32_t x1;
 volatile uint32_t y1;
+volatile uint32_t xy;
 __attribute__((section(".test1"))) void test_func(void)
 {
     char name1[10] = "task1";
@@ -60,7 +61,7 @@ __attribute__((section(".test1"))) void test_func(void)
     atomic test;
     atomic test1;
     task * pTaskNode[2];
-
+    xy = 0;
     test.lock();
     test1.unblockingLock();
     test.unlock();
@@ -85,7 +86,8 @@ __attribute__((section(".test1"))) void test_func(void)
     tasks[0].taskCreateTask(name1, &stack1[0], 50, 30, task1 );
     tasks[1].taskCreateTask(name2, &stack2[0], 50, 31, task2 );  
     taskList1.listInsertNodeData( pTaskNode[0] );
-    taskList1.listInsertNodeData( pTaskNode[1] );     
+    taskList1.listInsertNodeData( pTaskNode[1] );    
+    xy = 1; 
     while(x < 2);
     while(y < 2);
     while(1);
@@ -98,12 +100,14 @@ void task1(void)
         x++;
         if( ( x == 10000 ) && ( x1 == 0 ) )
         {
-            task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
+            task::taskPendTask( (uint32_t)(&tasks[0]) );
             x1 = 1;
         }
         if( ( x == 20000 ) && ( x1 == 1 ) )
         {
-            task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
+            task::taskPendTask( (uint32_t)(&tasks[0]) );
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
             x1 = 2;
         }   
         
@@ -117,10 +121,17 @@ void task2(void)
         y++;
         if( ( y == 10000 ) && ( y1 == 0 ) )
         {
-            task::taskSetTaskPriority( (uint32_t)(&tasks[0]), (uint8_t)8 );
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[0]), (uint8_t)8 );
+            task::taskUnpendTask( (uint32_t)(&tasks[0]) );
             y1 = 1;
         }
         
+        if( ( y == 20000 ) && ( y1 == 1 ) )
+        {
+            task::taskUnpendTask( (uint32_t)(&tasks[0]) );
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
+            y1 = 2;
+        }
     }
     while(1);
 }

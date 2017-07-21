@@ -1,14 +1,7 @@
 #ifndef __H_LIST_H__
 #define __H_LIST_H__
 #include "node.h"
-#define NODE_NOT_FOUND   (0xFF)
-enum boolean
-{
-    FALSE = 0,
-    TRUE  = 1
-};
 
-typedef enum boolean BOOLEAN; 
 template <class T, uint32_t MAX_NUMBER_OF_NODES> class list
 {
 private:

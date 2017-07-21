@@ -24,7 +24,7 @@ void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, ui
     this->pStack        = pStack;
     this->stackSize     = size;
     this->priority      = priority;
-    this->state         = TASK_STATE_SUSPENDED;  
+    this->state         = TASK_STATE_CREATED;  
     this->pTaskFunction = taskFunction;       
     this->cpuPrepareForExecution(pStack, (uint32_t *)taskFunction, size);
     this->taskId        = (uint32_t)this;
@@ -109,7 +109,8 @@ BOOLEAN task::taskSetTaskPriority( uint32_t taskId, uint8_t priority )
         {
             val = TRUE;
         }
-        asm("cpsie i");   
+        asm("cpsie i");  
+        asm("SVC #0");
     }
     else
     {
@@ -153,22 +154,33 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
     taskStateType  currentState;
     BOOLEAN        retVal;
     task         * pTask;
+    task         * pTemp;
     sched<SCHEDULER_TYPE>        * pSched;
     schedInfo    * pSchedInfo;
-
+    uint8_t        pos;
+    asm("cpsid i");
     pTask        = getTaskByTaskId( taskId );
+    pTemp        = pTask;
     currentState = pTask->state;
 
     pSched     = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
     pSchedInfo = pTask->taskGetSchedInfo();
 
     pSched->schedUpdateSchedInfo( taskId, pSchedInfo );
-    
-    if( currentState == TASK_STATE_READY )
+     
+    if( currentState == TASK_STATE_CREATED )
+    {
+        taskStateList[targetState].listInsertNodeData( pTask );
+        pSched->schedInsertSchedInfo( pSchedInfo );
+        pTask->state = targetState;
+        retVal = TRUE;
+    }
+    else if( currentState == TASK_STATE_READY )
     {
         if( currentState != targetState )
         {
-            taskStateList[currentState].listRemoveNodeData( pTask );
+            pos = taskStateList[currentState].listGetNodePosition( pTask ); 
+            taskStateList[currentState].listRemoveNodeData( pTemp, pos );
             taskStateList[targetState].listInsertNodeData( pTask );  
             pSched->schedRemoveSchedInfo( pSchedInfo );
             pTask->state = targetState;
@@ -183,7 +195,8 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
     {
         if( targetState == TASK_STATE_READY )
         {
-            taskStateList[currentState].listRemoveNodeData( pTask );
+            pos = taskStateList[currentState].listGetNodePosition( pTask );
+            taskStateList[currentState].listRemoveNodeData( pTemp, pos );
             taskStateList[targetState].listInsertNodeData( pTask );
             pSched->schedInsertSchedInfo( pSchedInfo );
             pTask->state = targetState;
@@ -194,7 +207,11 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
             retVal = FALSE;
         }
     }
-
+    asm("cpsie i");
+    if( (currentState != TASK_STATE_CREATED) && ( ( targetState == TASK_STATE_READY ) || ( currentState == TASK_STATE_READY ) ) )
+    {
+        asm("SVC #0");
+    }
     return retVal; 
 }
 

@@ -26,10 +26,21 @@ atomic::~atomic(void)
 
 }
 
-void atomic::unblockingLock()
+BOOLEAN atomic::unblockingLock()
 {
-    if(!__LDREXB(&(this->state))) 
-    __STREXB(1, &(this->state));
+    BOOLEAN retVal = FALSE;
+
+    if( !__LDREXB(&(this->state) ) ) 
+    {
+        __STREXB(1, &(this->state));
+        retVal = TRUE;
+    }
+    else
+    {
+        retVal = FALSE;
+    }
+
+    return retVal;
 }
 
 

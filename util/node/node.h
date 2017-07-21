@@ -2,6 +2,7 @@
 #define _H_NODE_H_
 #include "basetypes.h"
 //#define NULL                  ( 0U )
+#define NODE_NOT_FOUND          ( 0xFFu )
 template <class T>class node
 {
 public: 

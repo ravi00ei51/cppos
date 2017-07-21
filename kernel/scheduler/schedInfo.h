@@ -26,11 +26,13 @@ private:
 public:
     static sched * schedGetSchedInstance( void );
     static BOOLEAN schedInitSchedInfo( schedInfo * pSchedInfo );
+    static void     schedExecuteScheduler( void );
     BOOLEAN  schedUpdateSchedInfo( uint32_t taskId, schedInfo * pSchedInfo );
     BOOLEAN schedInsertSchedInfo( schedInfo * pSchedInfo );
     BOOLEAN schedRemoveSchedInfo( schedInfo * pSchedInfo );
     uint32_t schedGetNextTaskForExecution( void );
     uint32_t schedGetCurrentTaskForExecution( void );
+    
 };
 
 /*template <> class sched<SCHED_TYPE_RR>

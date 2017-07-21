@@ -10,13 +10,13 @@ val8:    .4byte reset6
 val9:    .4byte reset7
 val10:   .4byte reset8
 val11:   .4byte reset9
-val12:   .4byte __test_start+1
-val13:   .4byte __test_start+1
-val14:   .4byte __test_start+1
-val15:   .4byte __test_start+1
+val12:   .4byte __testS_start+1
+val13:   .4byte reset11
+val14:   .4byte reset12
+val15:   .4byte __testP_start+1
 val16:   .4byte __test_start+1
-val17:   .4byte __test_start+1
-val18:   .4byte __test_start+1
+val17:   .4byte reset15
+val18:   .4byte reset16
 
 
         .text

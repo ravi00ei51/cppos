@@ -106,4 +106,32 @@ template<> uint32_t sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetCurrentT
     return (this->taskId);
 }
 
+template<> void sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedExecuteScheduler( void )
+{
+    volatile uint32_t currentTaskId;
+    volatile uint32_t nextTaskId;
+    task *            pCurrentTask;
+    task *            pNextTask;
+    sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
+
+    asm("cpsid i");
+
+    nextTaskId = 0u;
+
+    pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
+    currentTaskId = pSched->taskId;
+    
+    nextTaskId = pSched->schedGetNextTaskForExecution();
+    if( currentTaskId != nextTaskId )
+    {
+       pNextTask    = task::getTaskByTaskId( nextTaskId );
+       pCurrentTask = task::getTaskByTaskId( currentTaskId );
+
+       if( currentTaskId != 0 )
+           pCurrentTask->cpuGetContext();
+       asm("cpsie i");
+       pNextTask->cpuSetContext();
+    }
+    asm("cpsie i");
+}
 

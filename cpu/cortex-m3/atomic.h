@@ -8,7 +8,7 @@ private:
 public:
    atomic();
    ~atomic();
-   void unblockingLock();
+   BOOLEAN unblockingLock();
    void lock();
    void unlock();
 };

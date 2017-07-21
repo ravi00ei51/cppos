@@ -49,66 +49,20 @@ void clockSetup( void )
 extern BOOLEAN schedInit;
 schedInfo schedI;
 static volatile uint32_t taskId;
-extern volatile uint32_t x;
+extern volatile uint32_t xy;
 __attribute__((section(".test"))) void systickInterruptFunction( void )
 {
-    //task * currentTask;
-    volatile uint32_t currentTaskId;
-    volatile uint32_t nextTaskId;
-    task *   pCurrentTask;
-    task *   pNextTask;
-    sched<SCHEDULER_TYPE> * pSched;
-    asm("cpsid i");   
-    nextTaskId = 0u;
-    pSched = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
-    currentTaskId = pSched->schedGetCurrentTaskForExecution();
-    nextTaskId    = pSched->schedGetNextTaskForExecution();
-    
-    if( currentTaskId != nextTaskId )
-    {
-       pNextTask = task::getTaskByTaskId( nextTaskId );
-       pCurrentTask = task::getTaskByTaskId( currentTaskId );
-       if( currentTaskId != 0 )
-       pCurrentTask->cpuGetContext();
-       asm("cpsie i");
-       pNextTask->cpuSetContext();
-    }
-    if( x == 0 )
-    {
-       pNextTask = task::getTaskByTaskId( nextTaskId );
-       asm("cpsie i");
-       pNextTask->cpuSetContext();
-    }    
-     
-    /*{
-        if( ( taskStart[0] == 0x00 ) && ( taskStart[1] == 0x00 ) )
-        {
-            taskStart[0] = 0x01;
-            taskList1.listGetNodeData(currentTask, 1);
- sm("cpsie i");           asm("cpsie i");
-            currentTask->cpuSetContext();
-        }
-        if( (taskStart[0] == 0x01 ) && ( taskStart[1] == 0x00 ) )
-        {
-            taskStart[1] = 0x01;
-            taskStart[0] = 0x00;
-            taskList1.listGetNodeData(currentTask, 1);
-            currentTask->cpuGetContext();     
-            taskList1.listGetNodeData(currentTask, 2);
-            asm("cpsie i");
-            currentTask->cpuSetContext();            
-        }
-        if( (taskStart[0] == 0x00 ) && ( taskStart[1] == 0x01 ) )
-        {
-            taskStart[1] = 0x00;
-            taskStart[0] = 0x01;
-            taskList1.listGetNodeData(currentTask, 2);
-            currentTask->cpuGetContext();
-            taskList1.listGetNodeData(currentTask, 1);
-            asm("cpsie i");
-            currentTask->cpuSetContext(); 
-        }
-    }*/
-    asm("cpsie i");    
+    //sched<SCHEDULER_TYPE>::schedExecuteScheduler(); 
+    if( xy != 0 )
+    *((volatile uint32_t *)0xE000ED04) = 0x10000000;     
 }
 
+__attribute__((section(".testPendSV"))) void pendSVInterruptFunction( void )
+{
+    sched<SCHEDULER_TYPE>::schedExecuteScheduler();
+}
+
+__attribute__((section(".testSVC"))) void SVCInterruptFunction( void )
+{
+    *((volatile uint32_t *)0xE000ED04) = 0x10000000;
+}

@@ -1,16 +1,17 @@
 #ifndef __H_SEMAPHORE_H__
 #define __H_SEMAPHORE_H__
 
+#include "basetypes.h"
+
 template <semType> semaphore:public atomic
 {
 private:
-    uint32_t semId;
-    BOOLEAN  status;
-    atomic   semLock;
+    atomic     semLock;
+    atomicList semList;
 public:
-    semaphore( BOOLEAN status );
-    semAccquire( void );
-    semRelease( void );
+    semaphore( void );
+    void semAccquire( void );
+    void semRelease( void );
 };
 
 #endif
