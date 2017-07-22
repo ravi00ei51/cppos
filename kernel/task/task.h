@@ -35,7 +35,7 @@ private:
     uint32_t              taskId;
     uint32_t              delay;
     schedInfo             schedData;
-    //static list<task, 6>  taskStateList[TASK_STATE_MAX];
+    static list<task, 6>  taskStateList[TASK_STATE_MAX];
 
     static BOOLEAN setTaskState( uint32_t, taskStateType );
 

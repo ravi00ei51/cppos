@@ -26,7 +26,7 @@ atomic::~atomic(void)
 
 }
 
-BOOLEAN atomic::unblockingLock()
+BOOLEAN atomic::tryLock()
 {
     BOOLEAN retVal = FALSE;
 

@@ -63,7 +63,7 @@ __attribute__((section(".test1"))) void test_func(void)
     task * pTaskNode[2];
     xy = 0;
     test.lock();
-    test1.unblockingLock();
+    test1.tryLock();
     test.unlock();
     test1.unlock();
     taskStart[0] = 0x00;
