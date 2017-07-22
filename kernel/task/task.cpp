@@ -147,7 +147,7 @@ schedInfo * task::taskGetSchedInfo( void )
     return ( &(this->schedData) );
 }
 
-list<task, 6> task::taskStateList[TASK_STATE_MAX];
+static list<task, 6> taskStateList[TASK_STATE_MAX];
 
 BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState )
 {

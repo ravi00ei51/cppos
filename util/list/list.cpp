@@ -404,33 +404,35 @@ template <class T, uint32_t maxNumberOfNodes> BOOLEAN list<T, maxNumberOfNodes>:
 
 template <class T, uint32_t maxNumberOfNodes> uint8_t list<T, maxNumberOfNodes>::listGetNodePosition( T *& pData )
 {
-    node<T> * pTempNode;
+    node<T> * pTempNode = NULL;
     uint8_t   i = 1;
-    BOOLEAN   nodeFound;
+    uint8_t   retVal;
+    BOOLEAN   nodeFound = FALSE;
     
     pTempNode = this->pHeadNode;    
     
-    while( pTempNode != NULL )
+    if( pTempNode != NULL )
     {
-        if( pTempNode->pData == pData )
+        for( i = 0; i < this->listNodeCount; i++ )
         {
-            nodeFound = TRUE;
+             if( pTempNode->pData == pData )
+             {
+                 nodeFound = TRUE;
+                 retVal    = i;
+                 retVal++;
+                 i         = this->listNodeCount;
+             }
+             else
+             {
+                 pTempNode = pTempNode->pNext;
+             }
         }
-
-        if( nodeFound == TRUE )
-        {
-            break;
-        }   
-
-        pTempNode = pTempNode->pNext;
-        i++;
     }
-      
     if( nodeFound == FALSE )
     {
-        i = NODE_NOT_FOUND;
+        retVal = NODE_NOT_FOUND;
     }
-    return i;  
+    return (uint8_t)retVal;  
 }
 
 template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODES>::listInsertFirstNodeData( T *& pData )
