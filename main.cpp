@@ -4,17 +4,23 @@
 #include "schedInfo.h"
 #include<task.h>
 #include<atomic.h>
+#include<semaphore.h>
 void task1(void);
 void task2(void);
+void task3(void);
+void task4(void);
 static uint32_t stack1[50];
 static uint32_t stack2[50];
+static uint32_t stack3[50];
+static uint32_t stack4[50];
+
 extern int flash_sdata;
 extern int ram_sdata;
 extern int ram_edata;
 extern int ram_0data;
 uint8_t taskStart[2];
 list<task,6> taskList1;
-task tasks[2];
+task tasks[4];
 extern uint8_t schedInit;
 extern uint8_t schedInit1;
 extern schedInfo schedI;
@@ -53,14 +59,21 @@ volatile uint32_t x;
 volatile uint32_t y;
 volatile uint32_t x1;
 volatile uint32_t y1;
+volatile uint32_t l;
+volatile uint32_t m;
+volatile uint32_t l1;
+volatile uint32_t m1;
 volatile uint32_t xy;
 __attribute__((section(".test1"))) void test_func(void)
 {
     char name1[10] = "task1";
-    char name2[10] = "task2"; 
+    char name2[10] = "task2";
+    char name3[10] = "task3";
+    char name4[10] = "task4";
+ 
     atomic test;
     atomic test1;
-    task * pTaskNode[2];
+    task * pTaskNode[4];
     xy = 0;
     test.lock();
     test1.tryLock();
@@ -70,10 +83,16 @@ __attribute__((section(".test1"))) void test_func(void)
     taskStart[1] = 0x00;
     pTaskNode[0] = &tasks[0];
     pTaskNode[1] = &tasks[1];
+    pTaskNode[2] = &tasks[2];
+    pTaskNode[3] = &tasks[3];
     x = 0;
     y = 0;
+    l = 0;
+    m = 0;
     x1 = 0;
     y1 = 0;
+    l1 = 0;
+    m1 = 0;
     schedInit = FALSE;
     schedInit1 = FALSE;
     schedI.taskId = 0;
@@ -85,14 +104,18 @@ __attribute__((section(".test1"))) void test_func(void)
     static_init();
     tasks[0].taskCreateTask(name1, &stack1[0], 50, 30, task1 );
     tasks[1].taskCreateTask(name2, &stack2[0], 50, 31, task2 );  
+    tasks[2].taskCreateTask(name3, &stack3[0], 50, 32, task3 );
+    tasks[3].taskCreateTask(name4, &stack4[0], 50, 33, task4 );
     taskList1.listInsertNodeData( pTaskNode[0] );
     taskList1.listInsertNodeData( pTaskNode[1] );    
+    taskList1.listInsertNodeData( pTaskNode[2] );
+    taskList1.listInsertNodeData( pTaskNode[3] );
     xy = 1; 
     while(x < 2);
     while(y < 2);
     while(1);
 }
-
+semaphore semId;
 void task1(void)
 {  
     do
@@ -102,11 +125,12 @@ void task1(void)
         {
             //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
             task::taskPendTask( (uint32_t)(&tasks[0]) );
+            semId.semAccquire(1000);       
             x1 = 1;
         }
         if( ( x == 20000 ) && ( x1 == 1 ) )
         {
-            task::taskPendTask( (uint32_t)(&tasks[0]) );
+            //task::taskPendTask( (uint32_t)(&tasks[0]) );
             //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
             x1 = 2;
         }   
@@ -122,16 +146,61 @@ void task2(void)
         if( ( y == 10000 ) && ( y1 == 0 ) )
         {
             //task::taskSetTaskPriority( (uint32_t)(&tasks[0]), (uint8_t)8 );
+            //task::taskPendTask( (uint32_t)(&tasks[1]) );
+            semId.semAccquire(1000);
             task::taskUnpendTask( (uint32_t)(&tasks[0]) );
             y1 = 1;
         }
         
         if( ( y == 20000 ) && ( y1 == 1 ) )
         {
-            task::taskUnpendTask( (uint32_t)(&tasks[0]) );
+            semId.semRelease();
             //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
             y1 = 2;
         }
     }
     while(1);
 }
+
+void task3(void)
+{
+    do
+    {
+        l++;
+        if( ( l == 10000 ) && ( l1 == 0 ) )
+        {
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
+            //task::taskPendTask( (uint32_t)(&tasks[2]) );
+            l1 = 1;
+        }
+        if( ( l == 20000 ) && ( l1 == 1 ) )
+        {
+            //task::taskUnpendTask( (uint32_t)(&tasks[1]) );
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
+            l1 = 2;
+        }
+
+    }while(1);
+}
+
+void task4(void)
+{
+    do
+    {
+        m++;
+        if( ( m == 10000 ) && ( m1 == 0 ) )
+        {
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
+            //task::taskUnpendTask( (uint32_t)(&tasks[2]) );
+            m1 = 1;
+        }
+        if( ( m == 20000 ) && ( m1 == 1 ) )
+        {
+            //task::taskPendTask( (uint32_t)(&tasks[0]) );
+            //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
+            m1 = 2;
+        }
+
+    }while(1);
+}
+

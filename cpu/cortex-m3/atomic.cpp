@@ -18,7 +18,7 @@ static inline uint32_t __STREXB(uint8_t value, volatile uint8_t *addr)
 
 atomic::atomic(void)
 {
-
+    this->state = 0u;
 }
 
 atomic::~atomic(void)
@@ -26,6 +26,10 @@ atomic::~atomic(void)
 
 }
 
+void atomic::init()
+{
+    this->state = 0u;
+}
 BOOLEAN atomic::tryLock()
 {
     BOOLEAN retVal = FALSE;

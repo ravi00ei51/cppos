@@ -8,6 +8,7 @@ private:
 public:
    atomic();
    ~atomic();
+   void init(void);
    BOOLEAN tryLock();
    void lock();
    void unlock();

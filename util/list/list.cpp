@@ -1,6 +1,7 @@
 #include "node.h"
 #include "list.h"
 #include "task.h"
+#include "semaphore.h"
 #include "schedInfo.h"
 
 template <class T, uint32_t MAX_NUMBER_OF_NODES> list<T, MAX_NUMBER_OF_NODES>::list( void )
@@ -629,3 +630,4 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> void list<T, MAX_NUMBER_OF_NODE
 
 template class list<task, 6>;
 template class list<schedInfo, 6>;
+template class list<semData_t, 6>;

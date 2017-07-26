@@ -20,6 +20,13 @@ enum taskState
     TASK_STATE_MAX
 };
 
+enum taskStateInvocation
+{
+    TASK_STATE_INVOKE_NOW,
+    TASK_STATE_INVOKE_LATER
+};
+
+typedef enum taskStateInvocation taskStateInvocationType;
 typedef enum taskState taskStateType;
 typedef void(*taskFunctionType)(void);
 
@@ -36,9 +43,6 @@ private:
     uint32_t              delay;
     schedInfo             schedData;
     static list<task, 6>  taskStateList[TASK_STATE_MAX];
-
-    static BOOLEAN setTaskState( uint32_t, taskStateType );
-
 public: 
     void           taskCreateTask( char * taskName, uint32_t * pStatck,uint32_t size, uint8_t priority, taskFunctionType taskFunction );
     void           taskDeleteTask( void );
@@ -57,6 +61,7 @@ public:
     static BOOLEAN taskUnpendTask( uint32_t taskId );
     static taskStateType getTaskState( void );
     static task * getTaskByTaskId( uint32_t taskId );
+    static BOOLEAN setTaskState( uint32_t, taskStateType, taskStateInvocationType );
 };   
 
 #endif

@@ -3,8 +3,10 @@
 #include "list.h"
 #include "task.h"
 #include "schedInfo.h"
+#include "semaphore.h"
 extern list<task,6> taskList1;
 extern uint8_t  taskStart[2];
+extern semaphore semId;
 void systickSetup( void )
 {
     SYSTICK_COUNTER_ENABLE();
@@ -53,8 +55,20 @@ extern volatile uint32_t xy;
 __attribute__((section(".test"))) void systickInterruptFunction( void )
 {
     //sched<SCHEDULER_TYPE>::schedExecuteScheduler(); 
-    if( xy != 0 )
-    *((volatile uint32_t *)0xE000ED04) = 0x10000000;     
+    if( xy == 2 )
+    {
+        xy = 1;
+        semaphore::semListUpdate( &semId );
+    }
+    else if( xy == 1 )
+    {
+        xy = 2;
+        *((volatile uint32_t *)0xE000ED04) = 0x10000000;     
+    }
+    else
+    {
+        xy = 1;
+    }
 }
 
 __attribute__((section(".testPendSV"))) void pendSVInterruptFunction( void )
