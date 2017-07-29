@@ -12,5 +12,6 @@ public:
    BOOLEAN tryLock();
    void lock();
    void unlock();
+   BOOLEAN status(void);
 };
 #endif

@@ -106,32 +106,58 @@ template<> uint32_t sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetCurrentT
     return (this->taskId);
 }
 
+template<> void sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedLock( void )
+{
+    sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
+    pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
+
+    pSched->lock.tryLock();
+}
+
+template<> void sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedUnlock( void )
+{
+    sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
+    pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
+
+    pSched->lock.unlock();
+}
+
+template<> BOOLEAN sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::isSchedLocked( void )
+{
+    sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
+    pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
+
+    return pSched->lock.status();
+}
+
 template<> void sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedExecuteScheduler( void )
 {
     volatile uint32_t currentTaskId;
     volatile uint32_t nextTaskId;
     task *            pCurrentTask;
     task *            pNextTask;
+    BOOLEAN           lockStatus;
     sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
-
-    asm("cpsid i");
 
     nextTaskId = 0u;
 
     pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
-    currentTaskId = pSched->taskId;
-    
-    nextTaskId = pSched->schedGetNextTaskForExecution();
-    if( currentTaskId != nextTaskId )
+    lockStatus    = pSched->isSchedLocked(); 
+    if( lockStatus == FALSE )
     {
-       pNextTask    = task::getTaskByTaskId( nextTaskId );
-       pCurrentTask = task::getTaskByTaskId( currentTaskId );
+        asm("cpsie i");
+        currentTaskId = pSched->taskId;
+        nextTaskId = pSched->schedGetNextTaskForExecution();
+        if( currentTaskId != nextTaskId )
+        {
+            pNextTask    = task::getTaskByTaskId( nextTaskId );
+            pCurrentTask = task::getTaskByTaskId( currentTaskId );
 
-       if( currentTaskId != 0 )
-           pCurrentTask->cpuGetContext();
-       asm("cpsie i");
-       pNextTask->cpuSetContext();
+            if( currentTaskId != 0 )
+                pCurrentTask->cpuGetContext();
+            asm("cpsie i");
+            pNextTask->cpuSetContext();
+        }
+        asm("cpsie i");
     }
-    asm("cpsie i");
 }
-

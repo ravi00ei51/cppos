@@ -61,3 +61,17 @@ void atomic::unlock()
     this->state = 0;
     return;
 }
+
+BOOLEAN atomic::status(void)
+{
+   BOOLEAN val;
+   if( this->state == 0u )
+   {
+       val = FALSE;
+   }
+   else
+   {
+       val = TRUE;
+   }
+   return val;
+}

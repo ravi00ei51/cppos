@@ -2,7 +2,7 @@
 #define _H_SHCEDINFO_H_
 #include "basetypes.h"
 #include "list.h"
-
+#include "atomic.h"
 enum schedAlgo
 {
     SCHED_TYPE_RR,
@@ -20,6 +20,7 @@ struct schedInfo
 template <schedType> class sched
 {
 private:
+    atomic              lock;
     list<schedInfo, 6>  schedulerList;
     uint32_t            taskId;
     sched();
@@ -32,7 +33,9 @@ public:
     BOOLEAN schedRemoveSchedInfo( schedInfo * pSchedInfo );
     uint32_t schedGetNextTaskForExecution( void );
     uint32_t schedGetCurrentTaskForExecution( void );
-    
+    static void     schedLock(void);
+    static void     schedUnlock(void);
+    static BOOLEAN  isSchedLocked(void);    
 };
 
 /*template <> class sched<SCHED_TYPE_RR>
