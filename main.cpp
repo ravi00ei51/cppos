@@ -124,7 +124,7 @@ void task1(void)
         if( ( x == 10000 ) && ( x1 == 0 ) )
         {
             //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
-            sched<SCHEDULER_TYPE>::schedLock();
+            //sched<SCHEDULER_TYPE>::schedLock();
             task::taskPendTask( (uint32_t)(&tasks[0]) );
             semId.semAccquire(1000);       
             x1 = 1;

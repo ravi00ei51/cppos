@@ -37,26 +37,20 @@ void semaphore::semAccquire( uint32_t timeout )
 
 void semaphore::semRelease( void )
 {
-    BOOLEAN val;
     semData_t * pData = NULL;
 
-    this->semLock.unlock();
     if( this->numberOfPendingTasks != 0u )
     {
-        val  = this->semLock.tryLock();
-
-        if( val == TRUE )
-        {
-            this->semList.listGetFirstNodeData(pData);
-            this->semOwner = pData->taskId;
-            this->semList.listRemoveFirstNodeData(pData);
-            this->numberOfPendingTasks--;
-            task::setTaskState( this->semOwner, TASK_STATE_READY, TASK_STATE_INVOKE_NOW );
-        }
+        this->semList.listGetFirstNodeData(pData);
+        this->semOwner = pData->taskId;
+        this->semList.listRemoveFirstNodeData(pData);
+        this->numberOfPendingTasks--;
+        task::setTaskState( this->semOwner, TASK_STATE_READY, TASK_STATE_INVOKE_NOW ); 
     }
     else
     {
-        this->semOwner = 0xFFFFFFFFu;
+        this->semOwner = 0xFFFFFFFF;
+        this->semLock.unlock();;
     } 
     
 }

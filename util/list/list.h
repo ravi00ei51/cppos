@@ -31,7 +31,7 @@ public:
 
     void listGetFirstNodeData( T *& pData );
     void listGetLastNodeData( T *& pData );
-    void listPrintNodeData( void );
+    uint8_t listNumberOfNodes( void );
 };
 
 #endif
