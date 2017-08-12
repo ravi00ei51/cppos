@@ -8,7 +8,8 @@
 
 
 #define MAX_TASK_NAME_LENGTH (10u)
-
+#define TASK_MINIMUM_PRIORITY (5u)
+#define TASK_MAXIMUM_PRIORITY (254u)
 enum taskState
 {
     TASK_STATE_CREATED,

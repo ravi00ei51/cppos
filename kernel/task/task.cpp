@@ -1,39 +1,73 @@
 #include "task.h"
+/**
+*********************************************************************************************************************************
+* Name - taskCreate()
+*
+* Description - Function to create task for given task object. Function initializes all member variables of task object to their
+*               initial value. Also it assigns the priority, stack, stack size and the function which need to be executed as 
+*               part of the task execution. Function also initializes the CPU registers for the task and puts task into ready 
+*               queue
+*
+* Param       - taskName: name of the task.
+*               pStack  : pointer to a buffer which acts as stack for the task under execution.
+*               size    : size of the stack buffer
+*               priority: priority of the task
+*               taskFunc: Function pointer to the task which needs to be executed
+*
+********************************************************************************************************************************/
 
 void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, uint8_t priority, taskFunctionType taskFunction )
 {   
     uint8_t i;
-    if( taskName != NULL )
+    if( pStack != NULL )
     {
-        for( i = 0; i < 50;i++ )
+        if( ( priority > TASK_MINIMUM_PRIORITY ) && ( priority < TASK_MAXIMUM_PRIORITY ) )
         {
-            if( taskName[i] != '\0' )
+            if( taskFunction != NULL )
             {
-                this->name[i] = taskName[i];
-            }
-            else
-            {
-                break;
+                if( taskName != NULL )
+                {
+                    for( i = 0; i < 50;i++ )
+                    {
+                        if( taskName[i] != '\0' )
+                        {
+                            this->name[i] = taskName[i];
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    this->name[0] = '\0'; 
+                }
+                this->pStack        = pStack;
+                this->stackSize     = size;
+                this->priority      = priority;
+                this->state         = TASK_STATE_CREATED;  
+                this->pTaskFunction = taskFunction;       
+                this->cpuPrepareForExecution(pStack, (uint32_t *)taskFunction, size);
+                this->taskId        = (uint32_t)this;
+                this->delay         = 0u;
+
+                sched<SCHEDULER_TYPE>::schedInitSchedInfo( &(this->schedData) ); 
+                setTaskState( this->taskId, TASK_STATE_READY, TASK_STATE_INVOKE_LATER );
             }
         }
     }
-    else
-    {
-        this->name[0] = '\0'; 
-    }
-    this->pStack        = pStack;
-    this->stackSize     = size;
-    this->priority      = priority;
-    this->state         = TASK_STATE_CREATED;  
-    this->pTaskFunction = taskFunction;       
-    this->cpuPrepareForExecution(pStack, (uint32_t *)taskFunction, size);
-    this->taskId        = (uint32_t)this;
-    this->delay         = 0u;
-
-    sched<SCHEDULER_TYPE>::schedInitSchedInfo( &(this->schedData) ); 
-    setTaskState( this->taskId, TASK_STATE_READY, TASK_STATE_INVOKE_LATER );
 }
 
+/**
+*********************************************************************************************************************************
+* Name - taskDelete
+*
+* Description - Function to delete an existing task.Function to create task for given task object. 
+*
+* Param       - taskName: name of the task.
+*
+********************************************************************************************************************************/
 void task::taskDeleteTask( void )
 {
     this->state = TASK_STATE_DELETE;
@@ -42,16 +76,18 @@ void task::taskDeleteTask( void )
 void task::taskGetTaskName( char * name )
 {
     uint8_t i;
-
-    for( i = 0; i < MAX_TASK_NAME_LENGTH;i++ )
+    if( name != NULL )
     {
-        if( this->name[i] != '\0' )
+        for( i = 0; i < MAX_TASK_NAME_LENGTH;i++ )
         {
-            name[i] = this->name[i];
-        }
-        else
-        {
-            break;
+            if( this->name[i] != '\0' )
+            {
+                name[i] = this->name[i];
+            }
+            else
+            {
+                break;
+            }
         }
     }
 }
@@ -59,16 +95,18 @@ void task::taskGetTaskName( char * name )
 void task::taskSetTaskName( char * name )
 {
     uint8_t i;
-
-    for( i = 0; i < MAX_TASK_NAME_LENGTH;i++ )
+    if( name != NULL )
     {
-        if( name[i] != '\0' )
+        for( i = 0; i < MAX_TASK_NAME_LENGTH;i++ )
         {
-            this->name[i] = name[i];
-        }
-        else
-        {
-            break;
+            if( name[i] != '\0' )
+            {
+                this->name[i] = name[i];
+            }
+            else
+            {
+                break;
+            }
         }
     }
 }

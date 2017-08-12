@@ -16,6 +16,7 @@
 #include "semaphore.h"        /* Semaphore header file to define template list for semaphore pend queue */
 #include "schedInfo.h"        /* Scheduler header file to define template list for ready queue list for context switching */
 #include "msgQ.h"
+#include "events.h"
 /* typedefs */
 /* Globals */
 
@@ -721,3 +722,4 @@ template class list<schedInfo, 6>;
 template class list<semData_t, 6>;
 template class list<queueNode, 10u>;
 template class list<pendNode, 6u>;
+template class list<eventNodeType, 6>;

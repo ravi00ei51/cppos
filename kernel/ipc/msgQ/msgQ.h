@@ -24,7 +24,8 @@ struct pendNode
 {
     uint32_t      taskId;
     uint32_t      timeout;
-    queueNodeType nodeData;
+    uint8_t       size;
+    uint8_t     * pBuffer;
 };
 
 typedef struct pendNode pendNodeType;
@@ -43,8 +44,8 @@ private:
     pendNodeType  * msgQAllocatePendNode( void );
     void            msgQFreePendNode( pendNodeType * );
 
-    void    msgQPutNodeToPendList( queuePendListType listType, uint32_t taskId, uint32_t timeout, uint8_t * pBuffer );
-    void    msgQGetNodeFromPendList( queuePendListType listType, uint8_t * pBuffer );
+    void   msgQPutNodeToPendList(queuePendListType listType, uint32_t taskId, uint32_t timeout, uint8_t * pBuffer, uint8_t size);
+    uint8_t msgQGetNodeFromPendList( queuePendListType listType, uint8_t * pBuffer, uint8_t size );
 
     void    msgQPutNodeToQueue( uint8_t * pBuffer, uint8_t size );
     uint8_t msgQGetNodeFromQueue( uint8_t * pBuffer ); 

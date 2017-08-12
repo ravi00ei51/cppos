@@ -5,6 +5,8 @@
 #include<task.h>
 #include<atomic.h>
 #include<semaphore.h>
+#include<msgQ.h>
+#include<events.h>
 void task1(void);
 void task2(void);
 void task3(void);
@@ -13,15 +15,16 @@ static uint32_t stack1[50];
 static uint32_t stack2[50];
 static uint32_t stack3[50];
 static uint32_t stack4[50];
-
+msgQ   queueMsg;
 extern int flash_sdata;
 extern int ram_sdata;
 extern int ram_edata;
 extern int ram_0data;
 uint8_t taskStart[2];
+events eventObj;
 list<task,6> taskList1;
 task tasks[4];
-extern uint8_t schedInit;
+//extern uint8_t schedInit;
 extern uint8_t schedInit1;
 extern schedInfo schedI;
 inline void static_init()
@@ -93,7 +96,7 @@ __attribute__((section(".test1"))) void test_func(void)
     y1 = 0;
     l1 = 0;
     m1 = 0;
-    schedInit = FALSE;
+    //schedInit = FALSE;
     schedInit1 = FALSE;
     schedI.taskId = 0;
     schedI.priority = 0;
@@ -118,6 +121,7 @@ __attribute__((section(".test1"))) void test_func(void)
 semaphore semId;
 void task1(void)
 {  
+    volatile uint8_t recv[6] = "Here";
     do
     {
         x++;
@@ -125,14 +129,16 @@ void task1(void)
         {
             //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)10 );
             //sched<SCHEDULER_TYPE>::schedLock();
-            task::taskPendTask( (uint32_t)(&tasks[0]) );
-            semId.semAccquire(1000);       
+            //task::taskPendTask( (uint32_t)(&tasks[0]) );
+            //semId.semAccquire(1000);
+            eventObj.eventTaskReceive( (uint32_t)&tasks[0], 1, 1000 ); 
             x1 = 1;
         }
         if( ( x == 20000 ) && ( x1 == 1 ) )
         {
             //task::taskPendTask( (uint32_t)(&tasks[0]) );
             //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
+            //queueMsg.msgQReceive( (uint8_t *)recv, 5, 1000 );
             x1 = 2;
         }   
         
@@ -141,6 +147,7 @@ void task1(void)
 
 void task2(void)
 {
+    volatile uint8_t buf[6] ="Hell";
     do
     {
         y++;
@@ -148,14 +155,22 @@ void task2(void)
         {
             //task::taskSetTaskPriority( (uint32_t)(&tasks[0]), (uint8_t)8 );
             //task::taskPendTask( (uint32_t)(&tasks[1]) );
-            semId.semAccquire(1000);
-            task::taskUnpendTask( (uint32_t)(&tasks[0]) );
+            //semId.semAccquire(1000);
+            //task::taskUnpendTask( (uint32_t)(&tasks[0]) );
+            //queueMsg.msgQSend( (uint8_t *)buf, 5u, 1000 );
+            //buf[4] = '1';
+            //queueMsg.msgQSend( (uint8_t *)buf, 5u, 1000 );
+            //buf[4] = '2';
+            //queueMsg.msgQSend( (uint8_t *)buf, 5u, 1000 );
+            //buf[4] = '3';
+            //queueMsg.msgQSend( (uint8_t *)buf, 5u, 1000 );
+            eventObj.eventSend( 1 );
             y1 = 1;
         }
         
         if( ( y == 20000 ) && ( y1 == 1 ) )
         {
-            semId.semRelease();
+            //semId.semRelease();
             //task::taskSetTaskPriority( (uint32_t)(&tasks[1]), (uint8_t)7 );
             y1 = 2;
         }

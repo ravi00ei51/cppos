@@ -9,6 +9,6 @@ SECTIONS {
    .init_array : { __init_array_start = .; KEEP (*(.init_array*)) ; __init_array_end = .; }
    .text : {* (.text) }
    . = 0x20000000;
-   .data : AT(0x08000000){ ram_0data = . ;*(.datax); ram_sdata = . ;* (.data); ram_edata = . ; }
+   .data : AT(0x08000000){ ram_0data = . ;KEEP(*(.datax)); ram_sdata = . ;* (.data); ram_edata = . ; }
    .bss  : { *(.bss); }
 }

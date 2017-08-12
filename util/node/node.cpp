@@ -3,6 +3,7 @@
 #include "schedInfo.h"
 #include "semaphore.h"
 #include "msgQ.h"
+#include "events.h"
 template <class T> node<T>::node(void)
 {
     this->pNext = NULL;
@@ -45,3 +46,4 @@ template class node<schedInfo>;
 template class node<semData_t>;
 template class node<queueNode>;
 template class node<pendNode>;
+template class node<eventNodeType>;
