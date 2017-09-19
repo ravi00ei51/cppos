@@ -1,12 +1,12 @@
 #ifndef __H_INTERRUPTS_H__
 #define __H_INTERRUPTS_H__
+#include "basetypes.h"
+
 #define INTERRUPT_VECTOR_TABLE_SIZE  15
-//#define NULL 0
-#define FALSE 0
-#define TRUE 1
-typedef unsigned char BOOLEAN;
-typedef unsigned char uint8_t;
-typedef unsigned int uint32_t;
+#define INTERRUPT_SYSTICK_NUM    ( 0xDu )
+#define INTERRUPT_PENDSV_NUM    ( 0xCu )
+#define INTERRUPT_SVC_NUM        ( 0x9u )
+
 class interrupts
 {
 private:

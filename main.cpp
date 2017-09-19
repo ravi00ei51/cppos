@@ -103,6 +103,7 @@ __attribute__((section(".test1"))) void test_func(void)
  
     clockSetup();    
     systickSetup();
+    interruptInit();
     copyDataToRam();
     static_init();
     tasks[0].taskCreateTask(name1, &stack1[0], 50, 30, task1 );
@@ -121,7 +122,7 @@ __attribute__((section(".test1"))) void test_func(void)
 semaphore semId;
 void task1(void)
 {  
-    volatile uint8_t recv[6] = "Here";
+    //volatile uint8_t recv[6] = "Here";
     do
     {
         x++;
@@ -147,7 +148,7 @@ void task1(void)
 
 void task2(void)
 {
-    volatile uint8_t buf[6] ="Hell";
+    //volatile uint8_t buf[6] ="Hell";
     do
     {
         y++;

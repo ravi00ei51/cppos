@@ -80,7 +80,7 @@ void events::eventTaskReceive( uint32_t taskId, uint8_t mask, uint32_t timeout )
         pNode = this->eventAllocateEventNode();
         if( pNode != NULL )
         {
-            mask           = (1 << mask);
+            mask           = (uint8_t)(1 << mask);
             pNode->taskId  = taskId;
             pNode->mask    = mask;
             pNode->timeout = timeout;

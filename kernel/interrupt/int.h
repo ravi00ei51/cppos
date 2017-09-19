@@ -88,5 +88,6 @@
 void systickSetup(void);
 void clockSetup(void);
 void systickInterruptFunction(void); 
+void interruptInit( void );
 #endif
 

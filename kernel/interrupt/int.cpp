@@ -4,6 +4,8 @@
 #include "task.h"
 #include "schedInfo.h"
 #include "semaphore.h"
+#include "interrupts.h"
+
 extern list<task,6> taskList1;
 extern uint8_t  taskStart[2];
 extern semaphore semId;
@@ -79,4 +81,13 @@ __attribute__((section(".testPendSV"))) void pendSVInterruptFunction( void )
 __attribute__((section(".testSVC"))) void SVCInterruptFunction( void )
 {
     *((volatile uint32_t *)0xE000ED04) = 0x10000000;
+}
+
+void interruptInit( void )
+{
+    interrupts * pObj;
+    pObj = interrupts::getInterruptsObject();
+    pObj->setVector( INTERRUPT_SYSTICK_NUM, systickInterruptFunction );
+    pObj->setVector( INTERRUPT_PENDSV_NUM, pendSVInterruptFunction );
+    pObj->setVector( INTERRUPT_SVC_NUM, SVCInterruptFunction );
 }

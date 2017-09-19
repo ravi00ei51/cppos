@@ -1,6 +1,4 @@
-#include<iostream>
 #include "interrupts.h"
-using namespace std;
 static uint8_t interruptsObj[sizeof(interrupts)];
 
 interrupts::interrupts( void )
