@@ -54,7 +54,7 @@ extern BOOLEAN schedInit;
 schedInfo schedI;
 static volatile uint32_t taskId;
 extern volatile uint32_t xy;
-__attribute__((section(".test"))) void systickInterruptFunction( void )
+void systickInterruptFunction( void )
 {
     //sched<SCHEDULER_TYPE>::schedExecuteScheduler(); 
     if( xy == 2 )
@@ -73,12 +73,12 @@ __attribute__((section(".test"))) void systickInterruptFunction( void )
     }
 }
 
-__attribute__((section(".testPendSV"))) void pendSVInterruptFunction( void )
+void pendSVInterruptFunction( void )
 {
     sched<SCHEDULER_TYPE>::schedExecuteScheduler();
 }
 
-__attribute__((section(".testSVC"))) void SVCInterruptFunction( void )
+void SVCInterruptFunction( void )
 {
     *((volatile uint32_t *)0xE000ED04) = 0x10000000;
 }
