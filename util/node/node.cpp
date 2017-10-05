@@ -43,7 +43,7 @@ template <class T> unsigned char node<T>::nodeGetNodePriority( void )
 
 template class node<task>;
 template class node<schedInfo>;
-template class node<semData_t>;
 template class node<queueNode>;
 template class node<pendNode>;
 template class node<eventNodeType>;
+template class node<ipcNodeType>;

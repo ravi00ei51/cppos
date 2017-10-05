@@ -17,6 +17,7 @@
 #include "schedInfo.h"        /* Scheduler header file to define template list for ready queue list for context switching */
 #include "msgQ.h"
 #include "events.h"
+#include "ipcList.h"
 /* typedefs */
 /* Globals */
 
@@ -719,7 +720,7 @@ template <class T, uint32_t MAX_NUMBER_OF_NODES> uint8_t list<T, MAX_NUMBER_OF_N
 }
 template class list<task, 6>;
 template class list<schedInfo, 6>;
-template class list<semData_t, 6>;
 template class list<queueNode, 10u>;
 template class list<pendNode, 6u>;
 template class list<eventNodeType, 6>;
+template class list<ipcNodeType, 6>;
