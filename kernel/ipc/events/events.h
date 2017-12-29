@@ -16,7 +16,7 @@ class events
 {
 private:
     eventNodeType              eventNodes[6];
-    list<eventNodeType, 6> eventPendList;
+    list                       eventPendList;
     eventNodeType * eventAllocateEventNode( void );
     void            eventFreeEventNode( eventNodeType * pNode );
 public:

@@ -4,8 +4,8 @@
 * Name - taskCreate()
 *
 * Description - Function to create task for given task object. Function initializes all member variables of task object to their
-*               initial value. Also it assigns the priority, stack, stack size and the function which need to be executed as 
-*               part of the task execution. Function also initializes the CPU registers for the task and puts task into ready 
+*               initial value. Also it assigns the priority, stack, stack size and the function which need to be executed as
+*               part of the task execution. Function also initializes the CPU registers for the task and puts task into ready
 *               queue
 *
 * Param       - taskName: name of the task.
@@ -17,42 +17,24 @@
 ********************************************************************************************************************************/
 
 void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, uint8_t priority, taskFunctionType taskFunction )
-{   
-    uint8_t i;
+{
     if( pStack != NULL )
     {
         if( ( priority > TASK_MINIMUM_PRIORITY ) && ( priority < TASK_MAXIMUM_PRIORITY ) )
         {
             if( taskFunction != NULL )
             {
-                if( taskName != NULL )
-                {
-                    for( i = 0; i < 50;i++ )
-                    {
-                        if( taskName[i] != '\0' )
-                        {
-                            this->name[i] = taskName[i];
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    this->name[0] = '\0'; 
-                }
+                this->name[0]       = '\0';
                 this->pStack        = pStack;
                 this->stackSize     = size;
                 this->priority      = priority;
-                this->state         = TASK_STATE_CREATED;  
-                this->pTaskFunction = taskFunction;       
+                this->state         = TASK_STATE_CREATED;
+                this->pTaskFunction = taskFunction;
                 this->cpuPrepareForExecution(pStack, (uint32_t *)taskFunction, size);
                 this->taskId        = (uint32_t)this;
                 this->delay         = 0u;
 
-                sched<SCHEDULER_TYPE>::schedInitSchedInfo( &(this->schedData) ); 
+                sched<SCHEDULER_TYPE>::schedInitSchedInfo( &(this->schedData) );
                 setTaskState( this->taskId, TASK_STATE_READY, TASK_STATE_INVOKE_LATER );
             }
         }
@@ -63,7 +45,7 @@ void task::taskCreateTask( char * taskName, uint32_t * pStack, uint32_t size, ui
 *********************************************************************************************************************************
 * Name - taskDelete
 *
-* Description - Function to delete an existing task.Function to create task for given task object. 
+* Description - Function to delete an existing task.Function to create task for given task object.
 *
 * Param       - taskName: name of the task.
 *
@@ -75,40 +57,12 @@ void task::taskDeleteTask( void )
 
 void task::taskGetTaskName( char * name )
 {
-    uint8_t i;
-    if( name != NULL )
-    {
-        for( i = 0; i < MAX_TASK_NAME_LENGTH;i++ )
-        {
-            if( this->name[i] != '\0' )
-            {
-                name[i] = this->name[i];
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
+    memcopy( (uint8_t *)name, (uint8_t *)this->name, 50u );
 }
 
 void task::taskSetTaskName( char * name )
 {
-    uint8_t i;
-    if( name != NULL )
-    {
-        for( i = 0; i < MAX_TASK_NAME_LENGTH;i++ )
-        {
-            if( name[i] != '\0' )
-            {
-                this->name[i] = name[i];
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
+    memcopy( (uint8_t *)this->name, (uint8_t *)name, 50u );
 }
 
 BOOLEAN task::taskSetTaskPriority( uint32_t taskId, uint8_t priority )
@@ -124,9 +78,9 @@ BOOLEAN task::taskSetTaskPriority( uint32_t taskId, uint8_t priority )
         asm("cpsid i");
         pTask->priority = priority;
         if( pTask->state == TASK_STATE_READY )
-        {  
+        {
             pSched = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
-            
+
             if( pSched != NULL )
             {
                 pSchedInfo = pTask->taskGetSchedInfo();
@@ -135,8 +89,8 @@ BOOLEAN task::taskSetTaskPriority( uint32_t taskId, uint8_t priority )
 
                 if( val == TRUE )
                 {
-                    val = pSched->schedInsertSchedInfo( pSchedInfo );  
-                } 
+                    val = pSched->schedInsertSchedInfo( pSchedInfo );
+                }
             }
             else
             {
@@ -147,7 +101,7 @@ BOOLEAN task::taskSetTaskPriority( uint32_t taskId, uint8_t priority )
         {
             val = TRUE;
         }
-        asm("cpsie i");  
+        asm("cpsie i");
         asm("SVC #0");
     }
     else
@@ -175,7 +129,7 @@ volatile uint32_t tempTaskId;
 task * task::getTaskByTaskId( uint32_t taskId )
 {
     volatile task * pTask;
-    pTask = (task *)taskId; 
+    pTask = (task *)taskId;
     tempTaskId = taskId;
     return (task *)pTask;
 }
@@ -185,7 +139,16 @@ schedInfo * task::taskGetSchedInfo( void )
     return ( &(this->schedData) );
 }
 
-list<task, 6> task::taskStateList[TASK_STATE_MAX];
+uint32_t task::taskGetSelfId( void )
+{
+    sched<SCHEDULER_TYPE> * pSched;
+    uint32_t                taskId;
+
+    pSched = sched<SCHEDULER_TYPE>::schedGetSchedInstance();
+    taskId = pSched->schedGetCurrentTaskForExecution();
+    return taskId;
+}
+list task::taskStateList[TASK_STATE_MAX];
 
 BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState, taskStateInvocationType invoke )
 {
@@ -205,10 +168,10 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState, taskStat
     pSchedInfo = pTask->taskGetSchedInfo();
 
     pSched->schedUpdateSchedInfo( taskId, pSchedInfo );
-     
+
     if( currentState == TASK_STATE_CREATED )
     {
-        taskStateList[targetState].listInsertNodeData( pTask );
+        taskStateList[targetState].listInsertNodeData( (void*&)pTask );
         pSched->schedInsertSchedInfo( pSchedInfo );
         pTask->state = targetState;
         retVal = TRUE;
@@ -217,9 +180,9 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState, taskStat
     {
         if( currentState != targetState )
         {
-            pos = taskStateList[currentState].listGetNodePosition( pTask ); 
-            taskStateList[currentState].listRemoveNodeData( pTemp, pos );
-            taskStateList[targetState].listInsertNodeData( pTask );  
+            pos = taskStateList[currentState].listGetNodePosition( (void*&)pTask );
+            taskStateList[currentState].listRemoveNodeData( (void*&)pTemp, pos );
+            taskStateList[targetState].listInsertNodeData( (void*&)pTask );
             pSched->schedRemoveSchedInfo( pSchedInfo );
             pTask->state = targetState;
             retVal = TRUE;
@@ -228,17 +191,17 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState, taskStat
         {
             retVal = TRUE;
         }
-    } 
+    }
     else
     {
         if( targetState == TASK_STATE_READY )
         {
-            pos = taskStateList[currentState].listGetNodePosition( pTask );
-            taskStateList[currentState].listRemoveNodeData( pTemp, pos );
-            taskStateList[targetState].listInsertNodeData( pTask );
+            pos = taskStateList[currentState].listGetNodePosition( (void*&)pTask );
+            taskStateList[currentState].listRemoveNodeData( (void*&)pTemp, pos );
+            taskStateList[targetState].listInsertNodeData( (void*&)pTask );
             pSched->schedInsertSchedInfo( pSchedInfo );
             pTask->state = targetState;
-            retVal = TRUE;  
+            retVal = TRUE;
         }
         else
         {
@@ -250,7 +213,7 @@ BOOLEAN task::setTaskState( uint32_t taskId, taskStateType targetState, taskStat
     {
         asm("SVC #0");
     }
-    return retVal; 
+    return retVal;
 }
 
 BOOLEAN task::taskSuspendTask( uint32_t taskId )
@@ -308,9 +271,9 @@ BOOLEAN task::taskDelayTask( uint32_t taskId, uint32_t delayInMs )
 {
     BOOLEAN retVal;
     task * pTask;
-    
+
     pTask        = (task*)taskId;//getTaskByTaskId( taskId );
-    pTask->delay = delayInMs;         
+    pTask->delay = delayInMs;
     retVal       = setTaskState( taskId, TASK_STATE_WAIT, TASK_STATE_INVOKE_NOW );
 
     return retVal;

@@ -16,8 +16,8 @@ public:
     interrupts( void );
     ~interrupts( void );
     void initialize( void );
-    void setVector( uint32_t intNum, void (*pFunc)( void ) );
-    void getVector( uint32_t intNum, void (*pFunc)( void ) );
+    void setVector( uint32_t intNum, void (*&pFunc)( void ) );
+    void getVector( uint32_t intNum, void (*&pFunc)( void ) );
     void runVector( uint32_t intNum );
     static interrupts * getInterruptsObject( void );
 };

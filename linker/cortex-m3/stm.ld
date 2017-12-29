@@ -1,7 +1,7 @@
 SECTIONS {
    . = 0x08000000;
    flash_sdata = . ;
-   . = 0x08000200;
+   . = 0x08000050;
    .interrupt00 : { __interrupt00_addr_start = .; KEEP(* (.interrupt00)) ;__interrupt00_addr_end = .; }
    .interrupt01 : { __interrupt01_addr_start = .; KEEP(* (.interrupt01)) ;__interrupt01_addr_end = .; }
    .interrupt02 : { __interrupt02_addr_start = .; KEEP(* (.interrupt02)) ;__interrupt02_addr_end = .; }
@@ -19,8 +19,6 @@ SECTIONS {
    .interrupt0E : { __interrupt0E_addr_start = .; KEEP(* (.interrupt0E)) ;__interrupt0E_addr_end = .; }
    .interrupt0F : { __interrupt0F_addr_start = .; KEEP(* (.interrupt0F)) ;__interrupt0F_addr_end = .; }
    .test : { __test_start = .;KEEP( * (.test)) ;__test_end = .; }
-   .testPendSV : { __testP_start = .;KEEP( * (.testPendSV)) ;__testP_end = .; }
-   .testSVC : { __testS_start = .; KEEP(* (.testSVC)) ;__testS_end = .; }
    .test1 : { __test1_start = .; KEEP(* (.test1)); __test1_end = .; }
    .init_array : { __init_array_start = .; KEEP (*(.init_array*)) ; __init_array_end = .; }
    .text : {* (.text) }

@@ -4,11 +4,7 @@
 
 events::events( void )
 {
-    uint8_t i;
-    for( i = 0; i < MAX_NUMBER_OF_EVENT_NODES; i++ )
-    {
-        this->eventNodes[i].free = TRUE;
-    }
+    memset( (uint8_t *)&this->eventNodes[0], 0x01u, MAX_NUMBER_OF_EVENT_NODES*sizeof(eventNodeType) );
 }
 
 events::~events( void )
@@ -26,7 +22,7 @@ eventNodeType * events::eventAllocateEventNode( void )
             this->eventNodes[i].free = FALSE;
             pNode = &(this->eventNodes[i]);
             break;
-        }   
+        }
     }
     return pNode;
 }
@@ -42,7 +38,7 @@ void events::eventFreeEventNode( eventNodeType * pNode )
 void events::eventSend( uint8_t maskId )
 {
     uint32_t mask = 0u;
-    uint32_t taskId = 0xFFFFFFFFu;  
+    uint32_t taskId = 0xFFFFFFFFu;
     uint32_t i = 0u;
     eventNodeType * pNode = NULL;
     if( this->eventPendList.listNumberOfNodes() > 0u )
@@ -51,13 +47,13 @@ void events::eventSend( uint8_t maskId )
         mask = ( 1u << maskId );
         for( i = 1; i <= this->eventPendList.listNumberOfNodes(); i++ )
         {
-            this->eventPendList.listGetNodeData( pNode, 1u );
+            this->eventPendList.listGetNodeData( (void*&)pNode, 1u );
             if( pNode->mask & mask )
             {
-                this->eventPendList.listRemoveNodeData( pNode );
+                this->eventPendList.listRemoveNodeData( (void*&)pNode );
                 taskId = pNode->taskId;
                 this->eventFreeEventNode( pNode );
-                task::setTaskState( taskId, TASK_STATE_READY, TASK_STATE_INVOKE_LATER ); 
+                task::setTaskState( taskId, TASK_STATE_READY, TASK_STATE_INVOKE_LATER );
             }
         }
         sched<SCHEDULER_TYPE>::schedUnlock();
@@ -84,9 +80,9 @@ void events::eventTaskReceive( uint32_t taskId, uint8_t mask, uint32_t timeout )
             pNode->taskId  = taskId;
             pNode->mask    = mask;
             pNode->timeout = timeout;
-            this->eventPendList.listInsertNodeData( pNode );
+            this->eventPendList.listInsertNodeData( (void*&)pNode );
             task::setTaskState( pNode->taskId, TASK_STATE_PENDED, TASK_STATE_INVOKE_LATER );
-        } 
+        }
     }
     else
     {

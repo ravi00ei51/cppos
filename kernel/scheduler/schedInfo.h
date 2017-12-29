@@ -8,7 +8,7 @@ enum schedAlgo
     SCHED_TYPE_RR,
     SCHED_TYPE_PRIORITY_BASED_PEMEPTION
 };
-#define CURRENT_SCHED_ALGO   SCHED_TYPE_RR
+
 typedef enum schedAlgo schedType;
 
 struct schedInfo
@@ -21,7 +21,7 @@ template <schedType> class sched
 {
 private:
     atomic              lock;
-    list<schedInfo, 6>  schedulerList;
+    list                schedulerList;
     uint32_t            taskId;
     sched();
 public:
@@ -35,8 +35,10 @@ public:
     uint32_t schedGetCurrentTaskForExecution( void );
     static void     schedLock(void);
     static void     schedUnlock(void);
-    static BOOLEAN  isSchedLocked(void);    
+    static BOOLEAN  isSchedLocked(void);
 };
+
+
 
 /*template <> class sched<SCHED_TYPE_RR>
 {
@@ -68,5 +70,5 @@ public:
     BOOLEAN schedRemoveSchedInfo( schedInfo * pSchedInfo );
     uint32_t schedGetNextTaskForExecution( void );
     uint32_t schedGetCurrentTaskForExecution( void );
-};*/ 
+};*/
 #endif

@@ -1,12 +1,11 @@
 #include "int.h"
-#include "node.h"
 #include "list.h"
 #include "task.h"
 #include "schedInfo.h"
 #include "semaphore.h"
 #include "interrupts.h"
 
-extern list<task,6> taskList1;
+extern list taskList1;
 extern uint8_t  taskStart[2];
 extern semaphore semId;
 void systickSetup( void )
@@ -86,8 +85,12 @@ void SVCInterruptFunction( void )
 void interruptInit( void )
 {
     interrupts * pObj;
+    void (*p)(void);
     pObj = interrupts::getInterruptsObject();
-    pObj->setVector( INTERRUPT_SYSTICK_NUM, systickInterruptFunction );
-    pObj->setVector( INTERRUPT_PENDSV_NUM, pendSVInterruptFunction );
-    pObj->setVector( INTERRUPT_SVC_NUM, SVCInterruptFunction );
+    p = systickInterruptFunction;
+    pObj->setVector( INTERRUPT_SYSTICK_NUM, p );
+    p = pendSVInterruptFunction;
+    pObj->setVector( INTERRUPT_PENDSV_NUM, p );
+    p = SVCInterruptFunction;
+    pObj->setVector( INTERRUPT_SVC_NUM, p );
 }

@@ -20,22 +20,6 @@ val18:   .4byte __interrupt0F_addr_start+1
 
 
         .text
-reset1:  b reset1
-reset2:  b reset2
-reset3:  b reset3
-reset4:  b reset4
-reset5:  b reset5
-reset6:  b reset6
-reset7:  b reset7
-reset8:  b reset8
-reset9:  b reset9
-reset10: b reset10
-reset11: b reset11
-reset12: b reset12
-reset13: b reset13
-reset14: b reset14
-reset15: b reset15
-reset16: b reset16
 .align 
 
 start:                           @ Label, not really required

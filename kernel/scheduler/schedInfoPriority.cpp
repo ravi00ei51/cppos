@@ -7,16 +7,11 @@ uint8_t        schedInit1;
 
 template<> sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance( void )
 {
-    uint32_t i = 0u;
     sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
-    pSched = ( sched * )&( schedInstance[0] );
+    pSched = ( sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * )&( schedInstance[0] );
     if( schedInit1 != TRUE )
     {
-        while( i < sizeof(sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>) )
-        {
-            schedInstance[i] = 0u;
-            i++;
-        }   
+        memset( (uint8_t *)&schedInstance[0], 0x00u, sizeof(sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>) );
         pSched->schedulerList.listInit();
         pSched->taskId = 0u;
         schedInit1 = TRUE;
@@ -27,41 +22,41 @@ template<> sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * sched<SCHED_TYPE_PRIORIT
 template<> BOOLEAN sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedInitSchedInfo( schedInfo * pSchedInfo )
 {
    pSchedInfo->taskId   = 0u;
-   pSchedInfo->priority = 0u; 
+   pSchedInfo->priority = 0u;
    return TRUE;
 }
 
 template<> BOOLEAN sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedUpdateSchedInfo( uint32_t taskId, schedInfo * pSchedInfo )
 {
     pSchedInfo->taskId   = taskId;
-    pSchedInfo->priority = task::taskGetTaskPriority(taskId);  
+    pSchedInfo->priority = task::taskGetTaskPriority(taskId);
     return TRUE;
 }
 
 template<> BOOLEAN sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedInsertSchedInfo( schedInfo * pSchedInfo )
 {
-    volatile BOOLEAN retVal; 
+    volatile BOOLEAN retVal;
     volatile uint8_t     i;
     schedInfo * pTempSchedInfo;
     if( pSchedInfo != NULL )
     {
         for( i = 0; ( pTempSchedInfo != NULL ); i ++ )
         {
-            retVal = this->schedulerList.listGetNodeData( pTempSchedInfo, (uint8_t)(i+1) );
+            retVal = this->schedulerList.listGetNodeData( (void*&)pTempSchedInfo, (uint8_t)(i+1) );
 
             if( ( retVal == TRUE ) && ( pTempSchedInfo != NULL ) )
             {
                 if( pSchedInfo->priority < pTempSchedInfo->priority )
                 {
-                    retVal = this->schedulerList.listInsertNodeData( pSchedInfo, (uint8_t)(i+1) ); 
+                    retVal = this->schedulerList.listInsertNodeData( (void*&)pSchedInfo, (uint8_t)(i+1) );
                     break;
                 }
             }
         }
         if( pTempSchedInfo == NULL )
         {
-            this->schedulerList.listInsertLastNodeData( pSchedInfo );
-        }     
+            this->schedulerList.listInsertLastNodeData( (void*&)pSchedInfo );
+        }
     }
     return retVal;
 }
@@ -72,10 +67,10 @@ template<> BOOLEAN sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedRemoveSchedI
     BOOLEAN retVal;
     if( pSchedInfo != NULL )
     {
-        pos = this->schedulerList.listGetNodePosition( pSchedInfo );
+        pos = this->schedulerList.listGetNodePosition( (void*&)pSchedInfo );
         if( pos != NODE_NOT_FOUND )
         {
-            this->schedulerList.listRemoveNodeData( pSchedInfo, pos );
+            this->schedulerList.listRemoveNodeData( (void*&)pSchedInfo, pos );
             retVal = TRUE;
         }
         else
@@ -93,12 +88,10 @@ template<> BOOLEAN sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedRemoveSchedI
 template<> uint32_t sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetNextTaskForExecution( void )
 {
     schedInfo  * pSchedInfo;
-    uint32_t     taskId;   
 
-    this->schedulerList.listGetFirstNodeData( pSchedInfo );
-    this->taskId = pSchedInfo->taskId;
-    taskId = pSchedInfo->taskId; 
-    return (taskId);
+    this->schedulerList.listGetFirstNodeData( (void*&)pSchedInfo );
+
+    return (pSchedInfo->taskId);
 }
 
 template<> uint32_t sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetCurrentTaskForExecution( void )
@@ -109,23 +102,21 @@ template<> uint32_t sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetCurrentT
 template<> void sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedLock( void )
 {
     sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
-    pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
-
+    pSched = (sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> *)schedInstance[0];
     pSched->lock.tryLock();
 }
 
 template<> void sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedUnlock( void )
 {
     sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
-    pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
-
+    pSched = (sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> *)&schedInstance[0];
     pSched->lock.unlock();
 }
 
 template<> BOOLEAN sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::isSchedLocked( void )
 {
     sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> * pSched;
-    pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
+    pSched        = (sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION> *)&schedInstance[0];
 
     return pSched->lock.status();
 }
@@ -142,12 +133,13 @@ template<> void sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedExecuteSchedule
     nextTaskId = 0u;
 
     pSched        = sched<SCHED_TYPE_PRIORITY_BASED_PEMEPTION>::schedGetSchedInstance();
-    lockStatus    = pSched->isSchedLocked(); 
+    lockStatus    = pSched->isSchedLocked();
     if( lockStatus == FALSE )
     {
-        asm("cpsie i");
+        asm("cpsid i");
         currentTaskId = pSched->taskId;
         nextTaskId = pSched->schedGetNextTaskForExecution();
+        pSched->taskId = nextTaskId;
         if( currentTaskId != nextTaskId )
         {
             pNextTask    = task::getTaskByTaskId( nextTaskId );

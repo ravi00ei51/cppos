@@ -3,35 +3,21 @@ static uint8_t interruptsObj[sizeof(interrupts)];
 
 interrupts::interrupts( void )
 {
-    uint32_t i;
-    this->init = FALSE;
-    for( i = 0u; i < INTERRUPT_VECTOR_TABLE_SIZE; i++ )
-    {
-        this->vectorTable[i] = NULL;
-    }
+    this->initialize();
 }
 
 interrupts::~interrupts( void )
 {
-    uint32_t i;
-    this->init = FALSE;
-    for( i = 0u; i < INTERRUPT_VECTOR_TABLE_SIZE; i++ )
-    {
-        this->vectorTable[i] = NULL;
-    }
+    this->initialize();
 }
 
 void interrupts::initialize( void )
 {
-    uint32_t i;
     this->init = FALSE;
-    for( i = 0u; i < INTERRUPT_VECTOR_TABLE_SIZE; i++ )
-    {   
-        this->vectorTable[i] = NULL;
-    }
+    memset((uint8_t *)&this->vectorTable[0],0x00u, INTERRUPT_VECTOR_TABLE_SIZE*sizeof( this->vectorTable[0] ) );
 }
 
-void interrupts::setVector( uint32_t intNum, void (*pFunc)( void ) )
+void interrupts::setVector( uint32_t intNum, void (*&pFunc)( void ) )
 {
     if( intNum < INTERRUPT_VECTOR_TABLE_SIZE )
     {
@@ -39,7 +25,7 @@ void interrupts::setVector( uint32_t intNum, void (*pFunc)( void ) )
     }
 }
 
-void interrupts::getVector( uint32_t intNum, void (*pFunc)( void ) )
+void interrupts::getVector( uint32_t intNum, void (*&pFunc)( void ) )
 {
     if( intNum < INTERRUPT_VECTOR_TABLE_SIZE )
     {
@@ -58,14 +44,14 @@ void interrupts::runVector( uint32_t intNum )
 interrupts * interrupts::getInterruptsObject( void )
 {
     interrupts * pObj = (interrupts *)&interruptsObj[0];
-    if( pObj->init != TRUE ) 
+    if( pObj->init != TRUE )
     {
         pObj->initialize();
         pObj->init = TRUE;
     }
     else
     {
-        //Do Nothing   
+        //Do Nothing
     }
     return (interrupts *)&interruptsObj[0];
 }

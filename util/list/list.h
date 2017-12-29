@@ -1,37 +1,51 @@
 #ifndef __H_LIST_H__
 #define __H_LIST_H__
-#include "node.h"
+#include "basetypes.h"
+#define MAX_NUMBER_OF_NODES (10u)
+#define NODE_NOT_FOUND (0xFFu)
+struct node
+{
+    struct node * pNext;
+    void *        pData;
+};
 
-template <class T, uint32_t MAX_NUMBER_OF_NODES> class list
+typedef struct node nodeType;
+class list
 {
 private:
-    node<T>    listNodes[MAX_NUMBER_OF_NODES];
-    node<T> *  pHeadNode;
+    node       listNodes[MAX_NUMBER_OF_NODES];
+    node    *  pHeadNode;
     uint8_t    listNodeCount;
 public:
     list( void );
-    list( T * pData[], uint8_t numberOfNodes );
+    list( void * pData[], uint8_t numberOfNodes );
     void listInit(void);
-    node<T> * listAllocateNode(void);
-    void    listFreeNode( node<T> * );
-    BOOLEAN listInsertNodeData( T *& pData );
-    BOOLEAN listRemoveNodeData( T *& pData );
+    node  * listAllocateNode(void);
+    void    listFreeNode( node * );
+    node *  listFindNodeByPosition( uint8_t pos );
+    BOOLEAN listInsertNodeData( void *& pData );
+    BOOLEAN listRemoveNodeData( void *& pData );
 
-    BOOLEAN listInsertNodeData( T *& pData, uint8_t pos );
-    BOOLEAN listRemoveNodeData( T *& pData, uint8_t pos );
+    BOOLEAN listInsertNodeData( void *& pData, uint8_t pos );
+    BOOLEAN listRemoveNodeData( void *& pData, uint8_t pos );
 
-    BOOLEAN listGetNodeData( T *& pData, uint8_t pos );
-    uint8_t listGetNodePosition( T *& pData );
+    BOOLEAN listGetNodeData( void *& pData, uint8_t pos );
+    uint8_t listGetNodePosition( void *& pData );
 
-    void listInsertFirstNodeData( T *& pData );
-    void listRemoveFirstNodeData( T *& pData );
+    void listInsertFirstNodeData( void *& pData );
+    void listRemoveFirstNodeData( void *& pData );
 
-    void listInsertLastNodeData( T *& pData );
-    void listRemoveLastNodeData( T *& pData );
+    void listInsertLastNodeData( void *& pData );
+    void listRemoveLastNodeData( void *& pData );
 
-    void listGetFirstNodeData( T *& pData );
-    void listGetLastNodeData( T *& pData );
+    void listGetFirstNodeData( void *& pData );
+    void listGetLastNodeData( void *& pData );
     uint8_t listNumberOfNodes( void );
 };
 
+#define listInsertFirstNodeData(x)    listInsertNodeData(x, 1)
+#define listRemoveFirstNodeData(x)    listRemoveNodeData(x, 1)
+#define listInsertLastNodeData(x)     listInsertNodeData(x)
+#define listRemoveLastNodeData(x)     listRemoveNodeData(x)
+#define listGetFirstNodeData(x)       listGetNodeData(x, 1);
 #endif

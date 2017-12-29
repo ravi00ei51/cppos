@@ -34,7 +34,7 @@ BOOLEAN atomic::tryLock()
 {
     BOOLEAN retVal = FALSE;
 
-    if( !__LDREXB(&(this->state) ) ) 
+    if( !__LDREXB(&(this->state) ) )
     {
         __STREXB(1, &(this->state));
         retVal = TRUE;

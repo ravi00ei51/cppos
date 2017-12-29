@@ -1,15 +1,15 @@
 #include "ipcList.h"
 #include "task.h"
-
+void memset( uint8_t * pSrc, uint8_t val, uint32_t size )
+{
+    while( size-- )
+    {
+        *pSrc++ = val;
+    }
+}
 void ipcList::ipcListInit(void)
 {
-    uint8_t i;
-    for( i = 0; i < MAX_IPC_NODES;i++ )
-    {
-        this->ipcNodes[i].taskId  = 0xFFFFFFFF;
-        this->ipcNodes[i].timeout = 0xFFFFFFFF;
-        this->ipcNodes[i].pData   = NULL;
-    }
+    memset( (uint8_t *)&this->ipcNodes[0], 0xFFu, MAX_IPC_NODES*sizeof(ipcNodeType) );
 }
 
 ipcNodeType * ipcList::ipcListAllocateData( void )
@@ -17,7 +17,7 @@ ipcNodeType * ipcList::ipcListAllocateData( void )
     uint8_t i;
     for( i = 0; i < MAX_IPC_NODES;i++ )
     {
-        if( ( this->ipcNodes[i].taskId == 0xFFFFFFFF ) && ( this->ipcNodes[i].timeout == 0xFFFFFFFF ) && ( this->ipcNodes[i].pData == NULL ) )
+        if( ( this->ipcNodes[i].taskId == 0xFFFFFFFF ) && ( this->ipcNodes[i].timeout == 0xFFFFFFFF ) )
         {
             return (&this->ipcNodes[i]);
         }
@@ -28,7 +28,6 @@ void ipcList::ipcListFreeData( ipcNodeType * pNode )
 {
     pNode->taskId  = 0xFFFFFFFF;
     pNode->timeout = 0xFFFFFFFF;
-    pNode->pData   = NULL;
 }
 
 /*
@@ -46,7 +45,7 @@ void ipcList::ipcListFreeData( ipcNodeType * pNode )
 ***********************************************************************************************************************
 */
 
-BOOLEAN ipcList::ipcListInsertData( uint32_t taskId, uint32_t timeout, void *& pData )
+BOOLEAN ipcList::ipcListInsertData( uint32_t taskId, uint32_t timeout )
 {
     BOOLEAN        retVal;
     ipcNodeType  * pIpcListData;
@@ -56,8 +55,7 @@ BOOLEAN ipcList::ipcListInsertData( uint32_t taskId, uint32_t timeout, void *& p
     {
         pIpcListData->taskId  = taskId;
         pIpcListData->timeout = timeout;
-        pIpcListData->pData   = pData;
-        this->memberList.listInsertNodeData( pIpcListData );
+        this->memberList.listInsertNodeData( (void*&)pIpcListData );
         task::setTaskState( taskId, TASK_STATE_PENDED, TASK_STATE_INVOKE_NOW );
         retVal = TRUE;
     }
@@ -83,17 +81,16 @@ BOOLEAN ipcList::ipcListInsertData( uint32_t taskId, uint32_t timeout, void *& p
 ***********************************************************************************************************************
 */
 
-BOOLEAN ipcList::ipcListRemoveData( uint32_t * pTaskId, void *& pData )
+BOOLEAN ipcList::ipcListRemoveData( uint32_t * pTaskId )
 {
     BOOLEAN        retVal;
     ipcNodeType *  pIpcListData;
 
-    retVal = this->memberList.listRemoveNodeData( pIpcListData );
+    retVal = this->memberList.listRemoveNodeData( (void*&)pIpcListData );
 
     if( retVal == TRUE )
     {
         *pTaskId = pIpcListData->taskId;
-         pData   = pIpcListData->pData;
          task::setTaskState( *pTaskId, TASK_STATE_READY, TASK_STATE_INVOKE_NOW );
     }
     else
@@ -125,12 +122,12 @@ void ipcList::ipcListTickFunction( void )
     uint8_t        i;
     for( i = 0; i < this->memberList.listNumberOfNodes(); i++ )
     {
-        this->memberList.listGetNodeData( pPendListData, i );
+        this->memberList.listGetNodeData( (void*&)pPendListData, i );
         pPendListData->timeout--;
         if( pPendListData->timeout == 0 )
         {
             taskId = pPendListData->taskId;
-            this->memberList.listRemoveNodeData( pPendListData, i );
+            this->memberList.listRemoveNodeData( (void*&)pPendListData, i );
             this->ipcListFreeData( pPendListData );
             task::setTaskState( taskId, TASK_STATE_READY, TASK_STATE_INVOKE_NOW );
         }

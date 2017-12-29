@@ -27,7 +27,7 @@
 ***********************************************************************************************************************
 */
 
-BOOLEAN ipc::ipcCapture( uint32_t taskId, uint32_t timeout, void *& pData )
+BOOLEAN ipc::ipcCapture( uint32_t taskId, uint32_t timeout )
 {
     BOOLEAN       retVal;
     BOOLEAN       isResourceAccquired;
@@ -37,12 +37,12 @@ BOOLEAN ipc::ipcCapture( uint32_t taskId, uint32_t timeout, void *& pData )
 
     if( isResourceAccquired == FALSE )
     {
-        /* Resource is not accquired. Pend the task on resource for given timeout */
-        retVal = this->ipcListInsertData( taskId, timeout, pData );
+        /* Resource is not acquired. Pend the task on resource for given timeout */
+        retVal = this->ipcListInsertData( taskId, timeout );
     }
     else
     {
-        retVal = this->ipcAssignResourceToTask( taskId, pData );
+        retVal = this->ipcAssignResourceToTask( taskId );
     }
     return retVal;
 }
@@ -65,17 +65,15 @@ BOOLEAN ipc::ipcRelease( void )
     BOOLEAN       retVal;
     uint8_t       listSize;
     uint32_t      taskId;
-    void        * pData;
 
     listSize = this->ipcListSize();
 
     if( listSize > 0 )
     {
-        retVal = this->ipcAssignResourceToTask( taskId, pData );
-
+        retVal = this->ipcListRemoveData( &taskId );
         if( retVal == TRUE )
         {
-            this->ipcListRemoveData( &taskId, pData );
+            retVal = this->ipcAssignResourceToTask( taskId );
         }
     }
     else
@@ -84,4 +82,3 @@ BOOLEAN ipc::ipcRelease( void )
     }
     return retVal;
 }
-
