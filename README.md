@@ -7,3 +7,4 @@ Project at first aims to provide following:
 4. Events
 5. Software timers
 6. Interrupt handling in OS.
+So far first three has been achieved. 
